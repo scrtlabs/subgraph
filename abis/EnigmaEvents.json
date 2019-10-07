@@ -1,0 +1,343 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "custodian",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "signer",
+        "type": "address"
+      }
+    ],
+    "name": "Registered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "sig",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "name": "hash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "workerAddr",
+        "type": "address"
+      }
+    ],
+    "name": "ValidatedSig",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "seed",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "firstBlockNumber",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "inclusionBlockNumber",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "workers",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "name": "stakes",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "name": "nonce",
+        "type": "uint256"
+      }
+    ],
+    "name": "WorkersParameterized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "taskId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "inputsHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "gasLimit",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "name": "gasPx",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "blockNumber",
+        "type": "uint256"
+      }
+    ],
+    "name": "TaskRecordCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "taskIds",
+        "type": "bytes32[]"
+      },
+      {
+        "indexed": false,
+        "name": "inputsHashes",
+        "type": "bytes32[]"
+      },
+      {
+        "indexed": false,
+        "name": "gasLimits",
+        "type": "uint64[]"
+      },
+      {
+        "indexed": false,
+        "name": "gasPxs",
+        "type": "uint64[]"
+      },
+      {
+        "indexed": false,
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "blockNumber",
+        "type": "uint256"
+      }
+    ],
+    "name": "TaskRecordsCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "taskId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "stateDeltaHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "outputHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "scAddr",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "gasUsed",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "deltaHashIndex",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "optionalEthereumData",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "name": "optionalEthereumContractAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "sig",
+        "type": "bytes"
+      }
+    ],
+    "name": "ReceiptVerified",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "taskIds",
+        "type": "bytes32[]"
+      },
+      {
+        "indexed": false,
+        "name": "stateDeltaHashes",
+        "type": "bytes32[]"
+      },
+      {
+        "indexed": false,
+        "name": "outputHashes",
+        "type": "bytes32[]"
+      },
+      {
+        "indexed": false,
+        "name": "optionalEthereumData",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "name": "optionalEthereumContractAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "sig",
+        "type": "bytes"
+      }
+    ],
+    "name": "ReceiptsVerified",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "taskId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "sig",
+        "type": "bytes"
+      }
+    ],
+    "name": "ReceiptFailed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "taskId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "sig",
+        "type": "bytes"
+      }
+    ],
+    "name": "ReceiptFailedETH",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "taskId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "TaskFeeReturned",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "DepositSuccessful",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "WithdrawSuccessful",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "scAddr",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "codeHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "initStateDeltaHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "SecretContractDeployed",
+    "type": "event"
+  }
+]

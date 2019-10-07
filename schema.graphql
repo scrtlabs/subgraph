@@ -1,0 +1,10 @@
+type SecretContract @entity {
+  id: ID!
+  address: Bytes!
+  codeHash: Bytes!
+  initStateDeltaHash: Bytes!
+
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+  createdAtTransaction: Bytes!
+}

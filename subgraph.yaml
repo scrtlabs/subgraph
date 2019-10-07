@@ -1,0 +1,47 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - name: EnigmaSimulation
+    kind: ethereum/contract
+    network: mainnet
+    source:
+      abi: EnigmaEvents
+      address: '0x59d3631c86bbe35ef041872d502f218a39fba150'
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      abis:
+        - name: EnigmaEvents
+          file: ./abis/EnigmaEvents.json
+      entities:
+        - SecretContract
+      eventHandlers:
+        - event: DepositSuccessful(address,uint256)
+          handler: handleDepositSuccessful
+        - event: ReceiptFailed(bytes32,bytes)
+          handler: handleReceiptFailed
+        - event: ReceiptFailedETH(bytes32,bytes)
+          handler: handleReceiptFailedETH
+        - event: ReceiptVerified(bytes32,bytes32,bytes32,bytes32,uint256,uint256,bytes,address,bytes)
+          handler: handleReceiptVerified
+        - event: ReceiptsVerified(bytes32[],bytes32[],bytes32[],bytes,address,bytes)
+          handler: handleReceiptsVerified
+        - event: Registered(address,address)
+          handler: handleRegistered
+        - event: SecretContractDeployed(bytes32,bytes32,bytes32)
+          handler: handleSecretContractDeployed
+        - event: TaskFeeReturned(bytes32)
+          handler: handleTaskFeeReturned
+        - event: TaskRecordCreated(bytes32,bytes32,uint64,uint64,address,uint256)
+          handler: handleTaskRecordCreated
+        - event: TaskRecordsCreated(bytes32[],bytes32[],uint64[],uint64[],address,uint256)
+          handler: handleTaskRecordsCreated
+        - event: ValidatedSig(bytes,bytes32,address)
+          handler: handleValidatedSig
+        - event: WithdrawSuccessful(address,uint256)
+          handler: handleWithdrawSuccessful
+        - event: WorkersParameterized(uint256,uint256,uint256,address[],uint256[],uint256)
+          handler: handleWorkersParameterized
