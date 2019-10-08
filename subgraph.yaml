@@ -17,6 +17,7 @@ dataSources:
         - name: EnigmaEvents
           file: ./abis/EnigmaEvents.json
       entities:
+        - Epoch
         - SecretContract
         - Task
         - Worker

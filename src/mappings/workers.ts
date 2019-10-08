@@ -8,7 +8,7 @@ import {
   WorkersParameterized,
 } from '../../generated/EnigmaSimulation/EnigmaEvents'
 
-import { Worker } from '../../generated/schema'
+import { Epoch, Worker } from '../../generated/schema'
 
 export function handleWorkerRegistration(event: Registered): void {
   let worker = new Worker(event.params.custodian.toHexString())
@@ -46,6 +46,28 @@ export function handleWorkerWithdraw(event: WithdrawSuccessful): void {
   }
 }
 
-export function handleValidatedSig(event: ValidatedSig): void {}
+export function handleValidatedSig(event: ValidatedSig): void {
+  // Unused event
+}
 
-export function handleWorkersParameterized(event: WorkersParameterized): void {}
+export function handleWorkersParameterized(event: WorkersParameterized): void {
+  let epoch = new Epoch(event.params.nonce.toString())
+  epoch.seed = event.params.seed
+  epoch.firstBlockNumber = event.params.firstBlockNumber
+  epoch.inclusionBlockNumber = event.params.inclusionBlockNumber
+
+  epoch.save()
+
+  // TODO: Register workers in the epoch
+  // let workers = event.params.workers
+  //
+  // for (let w = 0; w < workers.length; ++w) {
+  //   let workerId = workers[w].toHexString()
+  //
+  //   let entity = new EpochWorker(epoch.id + '-' + workerId)
+  //   entity.epoch = epoch.id
+  //   entity.worker = workerId
+  //
+  //   entity.save()
+  // }
+}
