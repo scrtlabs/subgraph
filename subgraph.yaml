@@ -18,9 +18,10 @@ dataSources:
           file: ./abis/EnigmaEvents.json
       entities:
         - SecretContract
+        - Worker
       eventHandlers:
         - event: DepositSuccessful(address,uint256)
-          handler: handleDepositSuccessful
+          handler: handleWorkerDeposit
         - event: ReceiptFailed(bytes32,bytes)
           handler: handleReceiptFailed
         - event: ReceiptFailedETH(bytes32,bytes)
@@ -30,9 +31,9 @@ dataSources:
         - event: ReceiptsVerified(bytes32[],bytes32[],bytes32[],bytes,address,bytes)
           handler: handleReceiptsVerified
         - event: Registered(address,address)
-          handler: handleRegistered
+          handler: handleWorkerRegistration
         - event: SecretContractDeployed(bytes32,bytes32,bytes32)
-          handler: handleSecretContractDeployed
+          handler: handleSecretContractDeployment
         - event: TaskFeeReturned(bytes32)
           handler: handleTaskFeeReturned
         - event: TaskRecordCreated(bytes32,bytes32,uint64,uint64,address,uint256)
@@ -42,6 +43,6 @@ dataSources:
         - event: ValidatedSig(bytes,bytes32,address)
           handler: handleValidatedSig
         - event: WithdrawSuccessful(address,uint256)
-          handler: handleWithdrawSuccessful
+          handler: handleWorkerWithdraw
         - event: WorkersParameterized(uint256,uint256,uint256,address[],uint256[],uint256)
           handler: handleWorkersParameterized

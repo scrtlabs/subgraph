@@ -1,10 +1,88 @@
 type SecretContract @entity {
+  " Equals to: <taskId> "
   id: ID!
+
+  " Contract address "
   address: Bytes!
+
+  " Deployed bytecode hash "
   codeHash: Bytes!
+
+  " Initial state delta hash as a result of the contract's constructor "
   initStateDeltaHash: Bytes!
 
+  " Creation timestamp as seconds "
   createdAt: BigInt!
+
+  " Creation block number "
   createdAtBlock: BigInt!
+
+  " Creation transaction hash "
   createdAtTransaction: Bytes!
+}
+
+" The data representation of a worker (or node) "
+type Worker @entity {
+  " Equals to: <custodianAddress> "
+  id: ID!
+
+  " ENG balance of worker "
+  balance: BigInt!
+
+  " The worker's custodian address "
+  custodianAddress: Bytes!
+
+  " The signer address, derived from the enclave public key "
+  signerAddress: Bytes!
+
+  " Worker status "
+  status: WorkerStatus!
+
+  " Creation timestamp as seconds "
+  createdAt: BigInt!
+
+  " Creation block number "
+  createdAtBlock: BigInt!
+
+  " Creation transaction hash "
+  createdAtTransaction: Bytes!
+
+  " Logs containing info regarding updates in worker status "
+  logs: [WorkerLog!]! @derivedFrom(field: "worker")
+}
+
+enum WorkerStatus {
+  Unregistered
+  LoggedIn
+  LoggedOut
+}
+
+" Info regarding updates in a worker status "
+type WorkerLog @entity {
+  id: ID!
+
+  " Worker ID "
+  worker: Worker!
+
+  " Worker log type "
+  type: WorkerLogType!
+
+  " ENG balance of worker "
+  balance: BigInt!
+
+  " Block number "
+  timestamp: BigInt!
+
+  " Block number "
+  block: BigInt!
+
+  " Block number "
+  transaction: Bytes!
+}
+
+enum WorkerLogType {
+  Undefined
+  LogIn
+  LogOut
+  Compound
 }
