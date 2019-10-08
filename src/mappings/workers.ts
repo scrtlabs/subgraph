@@ -1,0 +1,51 @@
+import { BigInt, log } from '@graphprotocol/graph-ts'
+
+import {
+  DepositSuccessful,
+  Registered,
+  ValidatedSig,
+  WithdrawSuccessful,
+  WorkersParameterized,
+} from '../../generated/EnigmaSimulation/EnigmaEvents'
+
+import { Worker } from '../../generated/schema'
+
+export function handleWorkerRegistration(event: Registered): void {
+  let worker = new Worker(event.params.custodian.toHexString())
+  worker.custodianAddress = event.params.custodian
+  worker.signerAddress = event.params.signer
+  worker.status = 'LoggedOut'
+  worker.balance = BigInt.fromI32(0)
+
+  worker.createdAt = event.block.timestamp
+  worker.createdAtBlock = event.block.number
+  worker.createdAtTransaction = event.transaction.hash
+
+  worker.save()
+}
+
+export function handleWorkerDeposit(event: DepositSuccessful): void {
+  let custodianAddress = event.params.from.toHexString()
+  let worker = Worker.load(custodianAddress)
+
+  if (worker != null) {
+    worker.balance = worker.balance.plus(event.params.value)
+  } else {
+    log.warning('Worker with custodian {} not registered', [custodianAddress])
+  }
+}
+
+export function handleWorkerWithdraw(event: WithdrawSuccessful): void {
+  let custodianAddress = event.params.to.toHexString()
+  let worker = Worker.load(custodianAddress)
+
+  if (worker != null) {
+    worker.balance = worker.balance.minus(event.params.value)
+  } else {
+    log.warning('Worker with custodian {} not registered', [custodianAddress])
+  }
+}
+
+export function handleValidatedSig(event: ValidatedSig): void {}
+
+export function handleWorkersParameterized(event: WorkersParameterized): void {}
