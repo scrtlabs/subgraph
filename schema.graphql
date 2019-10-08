@@ -21,6 +21,47 @@ type SecretContract @entity {
   createdAtTransaction: Bytes!
 }
 
+type Task @entity {
+  " Task ID "
+  id: ID!
+
+  " Inputs hash of encryptedFn, encryptedArgs, and contract address/preCodeHash "
+  inputsHash: Bytes!
+
+  " Output hash of task computation "
+  outputHash: Bytes
+
+  " ENG gas limit units "
+  gasLimit: BigInt!
+
+  " ENG gas px in grains (10 ** 8) amount "
+  gasPx: BigInt!
+
+  " Sender address "
+  sender: Bytes!
+
+  " Task status "
+  status: TaskStatus!
+
+  " Creation timestamp as seconds "
+  createdAt: BigInt!
+
+  " Creation block number "
+  createdAtBlock: BigInt!
+
+  " Creation transaction hash "
+  createdAtTransaction: Bytes!
+}
+
+enum TaskStatus {
+  RecordUndefined
+  RecordCreated
+  ReceiptVerified
+  ReceiptFailedENG
+  ReceiptFailedETH
+  ReceiptFailedReturn
+}
+
 " The data representation of a worker (or node) "
 type Worker @entity {
   " Equals to: <custodianAddress> "

@@ -1,4 +1,4 @@
-import { BigInt, log } from '@graphprotocol/graph-ts'
+import { Address, BigInt, Bytes, EthereumEvent, log } from '@graphprotocol/graph-ts'
 
 import {
   DepositSuccessful,
@@ -16,7 +16,7 @@ import {
   WorkersParameterized,
 } from '../generated/EnigmaSimulation/EnigmaEvents'
 
-import { SecretContract, Worker } from '../generated/schema'
+import { SecretContract, Task, Worker } from '../generated/schema'
 
 export function handleReceiptFailed(event: ReceiptFailed): void {}
 
@@ -41,9 +41,29 @@ export function handleSecretContractDeployment(event: SecretContractDeployed): v
 
 export function handleTaskFeeReturned(event: TaskFeeReturned): void {}
 
-export function handleTaskRecordCreated(event: TaskRecordCreated): void {}
+export function handleTaskRecordCreated(event: TaskRecordCreated): void {
+  createTask(
+    event.params.taskId,
+    event.params.inputsHash,
+    event.params.gasLimit,
+    event.params.gasPx,
+    event.params.sender,
+    event,
+  )
+}
 
-export function handleTaskRecordsCreated(event: TaskRecordsCreated): void {}
+export function handleTaskRecordsCreated(event: TaskRecordsCreated): void {
+  event.params.taskIds.forEach((taskId, i) => {
+    createTask(
+      event.params.taskIds[i],
+      event.params.inputsHashes[i],
+      event.params.gasLimits[i],
+      event.params.gasPxs[i],
+      event.params.sender,
+      event,
+    )
+  })
+}
 
 export function handleValidatedSig(event: ValidatedSig): void {}
 
@@ -84,3 +104,27 @@ export function handleWorkerWithdraw(event: WithdrawSuccessful): void {
 }
 
 export function handleWorkersParameterized(event: WorkersParameterized): void {}
+
+function createTask(
+  taskId: Bytes,
+  inputsHash: Bytes,
+  gasLimit: BigInt,
+  gasPx: BigInt,
+  sender: Address,
+  event: EthereumEvent,
+): Task {
+  let task = new Task(taskId.toHexString())
+  task.inputsHash = inputsHash
+  task.gasLimit = gasLimit
+  task.gasPx = gasPx
+  task.sender = sender
+  task.status = 'RecordCreated'
+
+  task.createdAt = event.block.timestamp
+  task.createdAtBlock = event.block.number
+  task.createdAtTransaction = event.transaction.hash
+
+  task.save()
+
+  return task
+}

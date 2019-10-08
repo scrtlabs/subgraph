@@ -18,6 +18,7 @@ dataSources:
           file: ./abis/EnigmaEvents.json
       entities:
         - SecretContract
+        - Task
         - Worker
       eventHandlers:
         - event: DepositSuccessful(address,uint256)
