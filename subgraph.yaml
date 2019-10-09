@@ -16,11 +16,15 @@ dataSources:
       abis:
         - name: EnigmaEvents
           file: ./abis/EnigmaEvents.json
+        - name: EnigmaStorage
+          file: ./abis/EnigmaStorage.json
       entities:
+        - EnigmaState
         - Epoch
         - SecretContract
         - Task
         - Worker
+        - WorkerSelection
       eventHandlers:
         - event: DepositSuccessful(address,uint256)
           handler: handleWorkerDeposit

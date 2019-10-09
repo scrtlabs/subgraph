@@ -1,0 +1,303 @@
+[
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getAllSecretContractAddresses",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getWorkersParams",
+    "outputs": [
+      {
+        "components": [
+          {
+            "name": "firstBlockNumber",
+            "type": "uint256"
+          },
+          {
+            "name": "workers",
+            "type": "address[]"
+          },
+          {
+            "name": "stakes",
+            "type": "uint256[]"
+          },
+          {
+            "name": "seed",
+            "type": "uint256"
+          }
+        ],
+        "name": "",
+        "type": "tuple[5]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_scAddr",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getSecretContract",
+    "outputs": [
+      {
+        "components": [
+          {
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "name": "preCodeHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "codeHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "stateDeltaHashes",
+            "type": "bytes32[]"
+          },
+          {
+            "name": "status",
+            "type": "uint8"
+          }
+        ],
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_taskId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getTaskRecord",
+    "outputs": [
+      {
+        "components": [
+          {
+            "name": "sender",
+            "type": "address"
+          },
+          {
+            "name": "inputsHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "outputHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "gasLimit",
+            "type": "uint64"
+          },
+          {
+            "name": "gasPx",
+            "type": "uint64"
+          },
+          {
+            "name": "blockNumber",
+            "type": "uint256"
+          },
+          {
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "name": "proof",
+            "type": "bytes"
+          }
+        ],
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_signer",
+        "type": "address"
+      }
+    ],
+    "name": "getWorkerFromSigningAddress",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "name": "signer",
+            "type": "address"
+          },
+          {
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "name": "report",
+            "type": "bytes"
+          },
+          {
+            "name": "balance",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "name": "workerEventType",
+                "type": "uint8"
+              },
+              {
+                "name": "blockNumber",
+                "type": "uint256"
+              },
+              {
+                "name": "balance",
+                "type": "uint256"
+              }
+            ],
+            "name": "workerLogs",
+            "type": "tuple[]"
+          }
+        ],
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_worker",
+        "type": "address"
+      }
+    ],
+    "name": "getWorker",
+    "outputs": [
+      {
+        "components": [
+          {
+            "name": "signer",
+            "type": "address"
+          },
+          {
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "name": "report",
+            "type": "bytes"
+          },
+          {
+            "name": "balance",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "name": "workerEventType",
+                "type": "uint8"
+              },
+              {
+                "name": "blockNumber",
+                "type": "uint256"
+              },
+              {
+                "name": "balance",
+                "type": "uint256"
+              }
+            ],
+            "name": "workerLogs",
+            "type": "tuple[]"
+          }
+        ],
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getSigningAddress",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getEpochSize",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_sender",
+        "type": "address"
+      }
+    ],
+    "name": "getUserTaskDeployments",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
