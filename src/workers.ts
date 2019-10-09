@@ -8,7 +8,7 @@ import {
   WorkersParameterized,
 } from '../generated/EnigmaSimulation/EnigmaEvents'
 
-import { Epoch, Worker, WorkerSelection } from '../generated/schema'
+import { Epoch, Worker } from '../generated/schema'
 
 import { getCurrentState } from './state'
 import { toDecimal } from './token'
@@ -19,6 +19,7 @@ export function handleWorkerRegistration(event: Registered): void {
   worker.signerAddress = event.params.signer
   worker.status = 'LoggedOut'
   worker.balance = BigDecimal.fromString('0')
+  worker.epochs = []
 
   worker.createdAt = event.block.timestamp
   worker.createdAtBlock = event.block.number
@@ -62,24 +63,24 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   epoch.inclusionBlockNumber = event.params.inclusionBlockNumber
   epoch.seed = event.params.seed
   epoch.startTime = event.block.timestamp
+  epoch.workers = event.params.workers.map<string>(w => w.toHexString())
 
   epoch.save()
 
   // Register active workers in the epoch
-  let activeWorkers = event.params.workers
-  let stakes = event.params.stakes
+  let activeWorkers = epoch.workers
 
   for (let w = 0; w < activeWorkers.length; ++w) {
-    let workerId = activeWorkers[w].toHexString()
+    let workerId = activeWorkers[w]
     let worker = Worker.load(workerId)
 
     if (worker != null) {
-      let selection = new WorkerSelection(epoch.id + '-' + worker.id)
-      selection.epoch = epoch.id
-      selection.worker = worker.id
-      selection.stake = toDecimal(stakes[w])
+      let workerEpochs = worker.epochs
+      workerEpochs.push(epoch.id)
 
-      selection.save()
+      worker.epochs = workerEpochs
+
+      worker.save()
     } else {
       log.warning('Worker #{} not found', [workerId])
     }

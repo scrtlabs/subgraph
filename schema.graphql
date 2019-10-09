@@ -29,7 +29,7 @@ type Epoch @entity {
   startTime: BigInt!
 
   " Active workers in the epoch "
-  workers: [WorkerSelection!]! @derivedFrom(field: "epoch")
+  workers: [Worker!]!
 }
 
 type SecretContract @entity {
@@ -123,25 +123,10 @@ type Worker @entity {
   createdAtTransaction: Bytes!
 
   " Epochs in with the worker was active "
-  epochs: [WorkerSelection!]! @derivedFrom(field: "worker")
+  epochs: [Epoch!]!
 
   " Logs containing info regarding updates in worker status "
   logs: [WorkerLog!]! @derivedFrom(field: "worker")
-}
-
-" Worker parameters in an epoch "
-type WorkerSelection @entity {
-  " Equals to: <epochNonce>-<workerId> "
-  id: ID!
-
-  " Epoch "
-  epoch: Epoch!
-
-  " Worker "
-  worker: Worker!
-
-  " Worker's stake "
-  stake: BigDecimal!
 }
 
 enum WorkerStatus {
