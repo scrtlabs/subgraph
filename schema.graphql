@@ -66,10 +66,10 @@ type Task @entity {
   outputHash: Bytes
 
   " ENG gas limit units "
-  gasLimit: BigInt!
+  gasLimit: BigDecimal!
 
   " ENG gas px in grains (10 ** 8) amount "
-  gasPx: BigInt!
+  gasPx: BigDecimal!
 
   " Sender address "
   sender: Bytes!
@@ -102,7 +102,7 @@ type Worker @entity {
   id: ID!
 
   " ENG balance of worker "
-  balance: BigInt!
+  balance: BigDecimal!
 
   " The worker's custodian address "
   custodianAddress: Bytes!
@@ -141,7 +141,7 @@ type WorkerSelection @entity {
   worker: Worker!
 
   " Worker's stake "
-  stake: BigInt!
+  stake: BigDecimal!
 }
 
 enum WorkerStatus {
@@ -161,7 +161,7 @@ type WorkerLog @entity {
   type: WorkerLogType!
 
   " ENG balance of worker "
-  balance: BigInt!
+  balance: BigDecimal!
 
   " Block number "
   timestamp: BigInt!

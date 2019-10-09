@@ -13,6 +13,8 @@ import {
 
 import { SecretContract, Task } from '../generated/schema'
 
+import { toDecimal } from './token'
+
 export function handleSecretContractDeployment(event: SecretContractDeployed): void {
   let secretContract = new SecretContract(event.params.scAddr.toHexString())
   secretContract.address = event.params.scAddr
@@ -69,8 +71,8 @@ function createTask(
 ): Task {
   let task = new Task(taskId.toHexString())
   task.inputsHash = inputsHash
-  task.gasLimit = gasLimit
-  task.gasPx = gasPx
+  task.gasLimit = toDecimal(gasLimit)
+  task.gasPx = toDecimal(gasPx)
   task.sender = sender
   task.status = 'RecordCreated'
 

@@ -1,4 +1,4 @@
-import { BigInt, log } from '@graphprotocol/graph-ts'
+import { BigDecimal, log } from '@graphprotocol/graph-ts'
 
 import {
   DepositSuccessful,
@@ -11,13 +11,14 @@ import {
 import { Epoch, Worker, WorkerSelection } from '../generated/schema'
 
 import { getCurrentState } from './state'
+import { toDecimal } from './token'
 
 export function handleWorkerRegistration(event: Registered): void {
   let worker = new Worker(event.params.signer.toHexString())
   worker.custodianAddress = event.params.custodian
   worker.signerAddress = event.params.signer
   worker.status = 'LoggedOut'
-  worker.balance = BigInt.fromI32(0)
+  worker.balance = BigDecimal.fromString('0')
 
   worker.createdAt = event.block.timestamp
   worker.createdAtBlock = event.block.number
@@ -31,7 +32,7 @@ export function handleWorkerDeposit(event: DepositSuccessful): void {
   let worker = Worker.load(workerId)
 
   if (worker != null) {
-    worker.balance = worker.balance.plus(event.params.value)
+    worker.balance = worker.balance.plus(toDecimal(event.params.value))
   } else {
     log.warning('Worker #{} not found', [workerId])
   }
@@ -42,7 +43,7 @@ export function handleWorkerWithdraw(event: WithdrawSuccessful): void {
   let worker = Worker.load(workerId)
 
   if (worker != null) {
-    worker.balance = worker.balance.minus(event.params.value)
+    worker.balance = worker.balance.minus(toDecimal(event.params.value))
   } else {
     log.warning('Worker #{} not found', [workerId])
   }
@@ -76,7 +77,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
       let selection = new WorkerSelection(epoch.id + '-' + worker.id)
       selection.epoch = epoch.id
       selection.worker = worker.id
-      selection.stake = stakes[w]
+      selection.stake = toDecimal(stakes[w])
 
       selection.save()
     } else {
