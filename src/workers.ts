@@ -6,9 +6,9 @@ import {
   ValidatedSig,
   WithdrawSuccessful,
   WorkersParameterized,
-} from '../../generated/EnigmaSimulation/EnigmaEvents'
+} from '../generated/EnigmaSimulation/EnigmaEvents'
 
-import { Epoch, Worker, WorkerSelection } from '../../generated/schema'
+import { Epoch, Worker, WorkerSelection } from '../generated/schema'
 
 import { getCurrentState } from './state'
 

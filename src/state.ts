@@ -1,8 +1,8 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts'
 
-import { EnigmaStorage } from '../../generated/EnigmaSimulation/EnigmaStorage'
+import { EnigmaStorage } from '../generated/EnigmaSimulation/EnigmaStorage'
 
-import { EnigmaState } from '../../generated/schema'
+import { EnigmaState } from '../generated/schema'
 
 const ENIGMA_STATE_KEY = '0'
 

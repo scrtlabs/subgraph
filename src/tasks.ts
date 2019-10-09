@@ -9,9 +9,9 @@ import {
   TaskFeeReturned,
   TaskRecordCreated,
   TaskRecordsCreated,
-} from '../../generated/EnigmaSimulation/EnigmaEvents'
+} from '../generated/EnigmaSimulation/EnigmaEvents'
 
-import { SecretContract, Task } from '../../generated/schema'
+import { SecretContract, Task } from '../generated/schema'
 
 export function handleSecretContractDeployment(event: SecretContractDeployed): void {
   let secretContract = new SecretContract(event.params.scAddr.toHexString())

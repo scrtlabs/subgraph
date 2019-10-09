@@ -12,7 +12,7 @@ dataSources:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
-      file: ./src/mappings/index.ts
+      file: ./src/index.ts
       abis:
         - name: EnigmaEvents
           file: ./abis/EnigmaEvents.json
