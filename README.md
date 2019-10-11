@@ -24,11 +24,20 @@ You can replace this with anything else in `docker-compose.yaml`.
 > sed -i -e 's/host.docker.internal/<IP ADDRESS>/g' docker-compose.yml
 > ```
 
-After you have set up an Ethereum node—e.g. Ganache or Parity—simply
-clone this repository and run
+### Steps to start the subgraph locally
+#### Install the dependencies
+```
+yarn install
+```
 
-```sh
-docker-compose up
+#### Generate the code from the subgraph schema
+```
+yarn codegen
+```
+
+#### Start the subgraph locally
+```
+yarn start-local
 ```
 
 This will start IPFS, Postgres and Graph Node in Docker and create persistent
@@ -44,3 +53,24 @@ can access these via:
   - `127.0.0.1:5001` or `/ip4/127.0.0.1/tcp/5001`
 - Postgres:
   - `postgresql://graph-node:let-me-in@localhost:5432/graph-node`
+
+
+#### Create the subgraph `enigmampc/enigma`
+Run this in a different terminal
+```
+yarn create-local
+```
+
+#### Deploy the subgraph
+```
+yarn deploy-local
+```
+
+This is the last step, from now on you should see all the data being created.
+
+## To update subgraphs
+  - Do the proper changes to the code
+  - Remove the `./data` directory
+  - Re-generate the code `yarn codegen`
+  - Re-deploy `yarn deploy-local`
+
