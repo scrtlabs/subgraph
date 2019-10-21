@@ -78,6 +78,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   epoch.tasksCount = BIGINT_ZERO
   epoch.tasksCompletedCount = BIGINT_ZERO
   epoch.tasksFailedCount = BIGINT_ZERO
+  epoch.gasUsed = BIGINT_ZERO
   epoch.reward = BIGDECIMAL_ZERO
 
   // Register active workers in the epoch

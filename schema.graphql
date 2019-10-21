@@ -46,6 +46,9 @@ type Epoch @entity {
   " Tasks created in the epoch "
   tasks: [Task!] @derivedFrom(field: "epoch")
 
+  " ENG gas used during this epoch"
+  gasUsed: BigInt
+
   " ENG reward "
   reward: BigDecimal
 
