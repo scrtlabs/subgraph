@@ -72,25 +72,22 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   epoch.inclusionBlockNumber = event.params.inclusionBlockNumber
   epoch.seed = event.params.seed
   epoch.startTime = event.block.timestamp
-  epoch.workers = event.params.workers.map<string>(w => w.toHexString())
   epoch.order = event.params.nonce
+  epoch.workers = new Array<string>()
 
   epoch.tasksCount = BIGINT_ZERO
   epoch.tasksCompletedCount = BIGINT_ZERO
   epoch.tasksFailedCount = BIGINT_ZERO
   epoch.reward = BIGDECIMAL_ZERO
 
-  epoch.save()
-
   // Register active workers in the epoch
-  let activeWorkers = epoch.workers
+  let activeWorkers = event.params.workers.map<string>(w => w.toHexString())
 
   for (let w = 0; w < activeWorkers.length; ++w) {
     let workerSignerId = activeWorkers[w]
     let workerSigner = WorkerSigner.load(workerSignerId)
     if (workerSigner != null) {
       let workerId = workerSigner.custodianAddress.toHexString()
-      log.warning('BUSCANDO WORKER #{}', [workerId])
       let worker = Worker.load(workerId)
 
       if (worker != null) {
@@ -100,6 +97,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
         worker.epochs = workerEpochs
 
         worker.save()
+        epoch.workers = epoch.workers.concat([workerId])
       } else {
         log.warning('Worker #{} not found', [workerId])
       }
@@ -107,6 +105,8 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
       log.warning('Worker with signer #{} not found', [workerSignerId])
     }
   }
+
+  epoch.save()
 
   // Save epoch as the latest one
   state.latestEpoch = epoch.id
