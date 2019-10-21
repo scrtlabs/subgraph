@@ -67,6 +67,7 @@ export function handleReceiptFailed(event: ReceiptFailed): void {
 
     let epoch = Epoch.load(task.epoch)
     epoch.tasksFailedCount = epoch.tasksFailedCount.plus(BIGINT_ONE)
+    // epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed) - FIXME: needs to add gasUsed to event params
     // epoch.reward = epoch.reward.plus(reward) - FIXME: needs to add gasUsed to event params
     epoch.save()
 
@@ -92,6 +93,7 @@ export function handleReceiptFailedETH(event: ReceiptFailedETH): void {
 
     let epoch = Epoch.load(task.epoch)
     epoch.tasksFailedCount = epoch.tasksFailedCount.plus(BIGINT_ONE)
+    // epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed) - FIXME: needs to add gasUsed to event params
     // eepoch.reward = epoch.reward.plus(reward) - FIXME: needs to add gasUsed to event params
     epoch.save()
 
@@ -130,6 +132,7 @@ export function handleReceiptVerified(event: ReceiptVerified): void {
 
     let epoch = Epoch.load(task.epoch)
     epoch.tasksCompletedCount = epoch.tasksCompletedCount.plus(BIGINT_ONE)
+    epoch.gasUsed = epoch.gasUsed.plus(event.params.gasUsed)
     epoch.reward = epoch.reward.plus(reward)
     epoch.save()
 
@@ -168,12 +171,11 @@ function createTask(
 
   task.epoch = state.latestEpoch
 
-  let epoch = Epoch.load(task.epoch)
+  let epoch = Epoch.load(state.latestEpoch)
   epoch.tasksCount = epoch.tasksCount.plus(BIGINT_ONE)
   epoch.save()
 
-  task.order = epoch.tasksCount.plus(BIGINT_ONE)
-
+  task.order = state.tasksCount
   task.save()
 
   return task
