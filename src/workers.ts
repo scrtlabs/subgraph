@@ -20,11 +20,11 @@ export function handleWorkerRegistration(event: Registered): void {
   worker.signerAddress = event.params.signer
   worker.status = 'LoggedOut'
   worker.balance = BigDecimal.fromString('0')
-  worker.epoches = []
+  worker.epochs = []
 
   worker.tasksCompletedCount = BIGINT_ZERO
   worker.tasksFailedCount = BIGINT_ZERO
-  worker.epochesCount = BIGINT_ZERO
+  worker.epochsCount = BIGINT_ZERO
 
   worker.createdAt = event.block.timestamp
   worker.createdAtBlock = event.block.number
@@ -98,11 +98,11 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
       let worker = Worker.load(workerId)
 
       if (worker != null) {
-        let workerEpoches = worker.epoches
-        workerEpoches.push(epoch.id)
+        let workerEpochs = worker.epochs
+        workerEpochs.push(epoch.id)
 
-        worker.epoches = workerEpoches
-        worker.epochesCount = worker.epochesCount.plus(BIGINT_ONE)
+        worker.epochs = workerEpochs
+        worker.epochsCount = worker.epochsCount.plus(BIGINT_ONE)
 
         worker.save()
         epoch.workers = epoch.workers.concat([workerId])

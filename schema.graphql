@@ -182,11 +182,11 @@ type Worker @entity {
   " Creation transaction hash "
   createdAtTransaction: Bytes!
 
-  " Number of Epoches in which the worker was active "
-  epochesCount: BigInt!
+  " Number of Epochs in which the worker was active "
+  epochsCount: BigInt!
 
-  " Epoches in which the worker was active "
-  epoches: [Epoch!]!
+  " Epochs in which the worker was active "
+  epochs: [Epoch!]!
 
   " Tasks worked "
   tasks: [Task!] @derivedFrom(field: "worker")
