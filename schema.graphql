@@ -18,7 +18,7 @@ type EnigmaState @entity {
   tasksFailedCount: BigInt!
 
   " Number of Workers "
-  workerCount: BigInt!
+  workersCount: BigInt!
 }
 
 type Epoch @entity {
@@ -39,6 +39,9 @@ type Epoch @entity {
 
   " Creation timestamp as seconds "
   startTime: BigInt!
+
+  " Number of active workers "
+  workersCount: BigInt!
 
   " Active workers in the epoch "
   workers: [Worker!]!
@@ -179,8 +182,11 @@ type Worker @entity {
   " Creation transaction hash "
   createdAtTransaction: Bytes!
 
-  " Epochs in with the worker was active "
-  epochs: [Epoch!]!
+  " Number of Epoches in which the worker was active "
+  epochesCount: BigInt!
+
+  " Epoches in which the worker was active "
+  epoches: [Epoch!]!
 
   " Tasks worked "
   tasks: [Task!] @derivedFrom(field: "worker")

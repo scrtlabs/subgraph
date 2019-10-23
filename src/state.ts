@@ -25,7 +25,7 @@ export function getCurrentState(principal?: Address): EnigmaState {
     state.tasksCount = BIGINT_ZERO
     state.tasksCompletedCount = BIGINT_ZERO
     state.tasksFailedCount = BIGINT_ZERO
-    state.workerCount = BIGINT_ZERO
+    state.workersCount = BIGINT_ZERO
 
     state.save()
   }

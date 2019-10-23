@@ -20,10 +20,11 @@ export function handleWorkerRegistration(event: Registered): void {
   worker.signerAddress = event.params.signer
   worker.status = 'LoggedOut'
   worker.balance = BigDecimal.fromString('0')
-  worker.epochs = []
+  worker.epoches = []
 
   worker.tasksCompletedCount = BIGINT_ZERO
   worker.tasksFailedCount = BIGINT_ZERO
+  worker.epochesCount = BIGINT_ZERO
 
   worker.createdAt = event.block.timestamp
   worker.createdAtBlock = event.block.number
@@ -36,7 +37,7 @@ export function handleWorkerRegistration(event: Registered): void {
   workerSigner.save()
 
   let state = getCurrentState(event.address)
-  state.workerCount = state.workerCount.plus(BIGINT_ONE)
+  state.workersCount = state.workersCount.plus(BIGINT_ONE)
   state.save()
 }
 
@@ -79,6 +80,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   epoch.order = event.params.nonce
   epoch.workers = new Array<string>()
 
+  epoch.workersCount = BIGINT_ZERO
   epoch.tasksCount = BIGINT_ZERO
   epoch.tasksCompletedCount = BIGINT_ZERO
   epoch.tasksFailedCount = BIGINT_ZERO
@@ -96,13 +98,15 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
       let worker = Worker.load(workerId)
 
       if (worker != null) {
-        let workerEpochs = worker.epochs
-        workerEpochs.push(epoch.id)
+        let workerEpoches = worker.epoches
+        workerEpoches.push(epoch.id)
 
-        worker.epochs = workerEpochs
+        worker.epoches = workerEpoches
+        worker.epochesCount = worker.epochesCount.plus(BIGINT_ONE)
 
         worker.save()
         epoch.workers = epoch.workers.concat([workerId])
+        epoch.workersCount = epoch.workersCount.plus(BIGINT_ONE)
       } else {
         log.warning('Worker #{} not found', [workerId])
       }
