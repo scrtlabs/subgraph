@@ -9,16 +9,16 @@ type EnigmaState @entity {
   latestEpoch: Epoch
 
   " Number of created Tasks "
-  tasksCount: BigInt!
+  taskCount: BigInt!
 
   " Number of completed Tasks "
-  tasksCompletedCount: BigInt!
+  completedTaskCount: BigInt!
 
   " Number of failed Tasks "
-  tasksFailedCount: BigInt!
+  failedTaskCount: BigInt!
 
   " Number of Workers "
-  workersCount: BigInt!
+  workerCount: BigInt!
 }
 
 type Epoch @entity {
@@ -40,14 +40,14 @@ type Epoch @entity {
   " Creation timestamp as seconds "
   startTime: BigInt!
 
+  " End timestamp as seconds "
+  endTime: BigInt!
+
   " Number of active workers "
-  workersCount: BigInt!
+  workerCount: BigInt!
 
   " Active workers in the epoch "
   workers: [Worker!]!
-
-  " Tasks created in the epoch "
-  tasks: [Task!] @derivedFrom(field: "epoch")
 
   " ENG gas used during this epoch"
   gasUsed: BigInt
@@ -56,13 +56,22 @@ type Epoch @entity {
   reward: BigDecimal
 
   " Number of created Tasks "
-  tasksCount: BigInt!
+  taskCount: BigInt!
 
   " Number of completed Tasks "
-  tasksCompletedCount: BigInt!
+  completedTaskCount: BigInt!
 
   " Number of failed Tasks "
-  tasksFailedCount: BigInt!
+  failedTaskCount: BigInt!
+
+  " Number of unique Users for this Epoch "
+  userCount: BigInt
+
+  " List of unique addresses using this SC "
+  users: [String!]
+
+  " Tasks created in the epoch "
+  tasks: [Task!] @derivedFrom(field: "epoch")
 }
 
 type SecretContract @entity {
@@ -77,6 +86,15 @@ type SecretContract @entity {
 
   " Initial state delta hash as a result of the contract's constructor "
   initStateDeltaHash: Bytes!
+
+  " Number of Tasks using this SC"
+  taskCount: BigInt
+
+  " Number of unique Users using this SC "
+  userCount: BigInt
+
+  " List of unique addresses using this SC "
+  users: [String!]
 
   " Creation timestamp as seconds "
   createdAt: BigInt!
@@ -105,7 +123,7 @@ type Task @entity {
   gasLimit: BigDecimal!
 
   " ENG gas px in grains (10 ** 8) amount "
-  gasPx: BigDecimal!
+  gasPrice: BigDecimal!
 
   " ENG gas used "
   gasUsed: BigInt
@@ -117,7 +135,7 @@ type Task @entity {
   status: TaskStatus!
 
   " Secret contract address "
-  scAddr: Bytes
+  secretContract: SecretContract
 
   " Ethereum contract address "
   optionalEthereumContractAddress: Bytes
@@ -138,13 +156,13 @@ type Task @entity {
   createdAtTransaction: Bytes!
 
   " Last status change (complete or fail) timestamp as seconds "
-  changedAt: BigInt
+  modifiedAt: BigInt
 
   " Last status change (complete or fail) block number "
-  changedAtBlock: BigInt
+  modifiedAtBlock: BigInt
 
   " Last status change (complete or fail) transaction hash "
-  changedAtTransaction: Bytes
+  modifiedAtTransaction: Bytes
 }
 
 enum TaskStatus {
@@ -183,25 +201,25 @@ type Worker @entity {
   createdAtTransaction: Bytes!
 
   " Number of Epochs in which the worker was active "
-  epochsCount: BigInt!
+  epochCount: BigInt!
 
   " Epochs in which the worker was active "
   epochs: [Epoch!]!
 
-  " Tasks worked "
-  tasks: [Task!] @derivedFrom(field: "worker")
-
   " ENG reward "
   reward: BigDecimal
 
-  " Logs containing info regarding updates in worker status "
-  logs: [WorkerLog!] @derivedFrom(field: "worker")
-
   " Number of completed Tasks "
-  tasksCompletedCount: BigInt!
+  completedTaskCount: BigInt!
 
   " Number of failed Tasks "
-  tasksFailedCount: BigInt!
+  failedTaskCount: BigInt!
+
+  " Tasks worked "
+  tasks: [Task!] @derivedFrom(field: "worker")
+
+  " Logs containing info regarding updates in worker status "
+  logs: [WorkerLog!] @derivedFrom(field: "worker")
 }
 
 " This allows to search workers by their signer address "

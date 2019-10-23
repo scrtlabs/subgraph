@@ -22,9 +22,9 @@ export function handleWorkerRegistration(event: Registered): void {
   worker.balance = BigDecimal.fromString('0')
   worker.epochs = []
 
-  worker.tasksCompletedCount = BIGINT_ZERO
-  worker.tasksFailedCount = BIGINT_ZERO
-  worker.epochsCount = BIGINT_ZERO
+  worker.completedTaskCount = BIGINT_ZERO
+  worker.failedTaskCount = BIGINT_ZERO
+  worker.epochCount = BIGINT_ZERO
 
   worker.createdAt = event.block.timestamp
   worker.createdAtBlock = event.block.number
@@ -37,7 +37,7 @@ export function handleWorkerRegistration(event: Registered): void {
   workerSigner.save()
 
   let state = getCurrentState(event.address)
-  state.workersCount = state.workersCount.plus(BIGINT_ONE)
+  state.workerCount = state.workerCount.plus(BIGINT_ONE)
   state.save()
 }
 
@@ -65,10 +65,6 @@ export function handleWorkerWithdraw(event: WithdrawSuccessful): void {
   }
 }
 
-// export function handleValidatedSig(event: ValidatedSig): void {
-//   // Unused event
-// }
-
 export function handleWorkersParameterized(event: WorkersParameterized): void {
   let state = getCurrentState(event.address)
 
@@ -80,10 +76,11 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   epoch.order = event.params.nonce
   epoch.workers = new Array<string>()
 
-  epoch.workersCount = BIGINT_ZERO
-  epoch.tasksCount = BIGINT_ZERO
-  epoch.tasksCompletedCount = BIGINT_ZERO
-  epoch.tasksFailedCount = BIGINT_ZERO
+  epoch.endTime = BIGINT_ZERO
+  epoch.workerCount = BIGINT_ZERO
+  epoch.taskCount = BIGINT_ZERO
+  epoch.completedTaskCount = BIGINT_ZERO
+  epoch.failedTaskCount = BIGINT_ZERO
   epoch.gasUsed = BIGINT_ZERO
   epoch.reward = BIGDECIMAL_ZERO
 
@@ -93,6 +90,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   for (let w = 0; w < activeWorkers.length; ++w) {
     let workerSignerId = activeWorkers[w]
     let workerSigner = WorkerSigner.load(workerSignerId)
+
     if (workerSigner != null) {
       let workerId = workerSigner.custodianAddress.toHexString()
       let worker = Worker.load(workerId)
@@ -102,11 +100,11 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
         workerEpochs.push(epoch.id)
 
         worker.epochs = workerEpochs
-        worker.epochsCount = worker.epochsCount.plus(BIGINT_ONE)
+        worker.epochCount = worker.epochCount.plus(BIGINT_ONE)
 
         worker.save()
         epoch.workers = epoch.workers.concat([workerId])
-        epoch.workersCount = epoch.workersCount.plus(BIGINT_ONE)
+        epoch.workerCount = epoch.workerCount.plus(BIGINT_ONE)
       } else {
         log.warning('Worker #{} not found', [workerId])
       }
@@ -116,6 +114,12 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   }
 
   epoch.save()
+
+  if (event.params.nonce.notEqual(BIGINT_ZERO)) {
+    let prevEpoch = Epoch.load(state.latestEpoch)
+    prevEpoch.endTime = event.block.timestamp
+    prevEpoch.save()
+  }
 
   // Save epoch as the latest one
   state.latestEpoch = epoch.id

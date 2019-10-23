@@ -13,7 +13,7 @@ import { SecretContract, Task, Worker, Epoch } from '../generated/schema'
 
 import { toDecimal } from './token'
 import { getCurrentState } from './state'
-import { BIGINT_ONE } from './helpers'
+import { BIGINT_ONE, BIGINT_ZERO } from './helpers'
 
 export function handleSecretContractDeployment(event: SecretContractDeployed): void {
   let secretContract = new SecretContract(event.params.scAddr.toHexString())
@@ -24,6 +24,8 @@ export function handleSecretContractDeployment(event: SecretContractDeployed): v
   secretContract.createdAt = event.block.timestamp
   secretContract.createdAtBlock = event.block.number
   secretContract.createdAtTransaction = event.transaction.hash
+  secretContract.taskCount = BIGINT_ZERO
+  secretContract.userCount = BIGINT_ZERO
 
   secretContract.save()
 }
@@ -39,34 +41,22 @@ export function handleTaskRecordCreated(event: TaskRecordCreated): void {
   )
 }
 
-// export function handleTaskRecordsCreated(event: TaskRecordsCreated): void {
-//   let taskIds = event.params.taskIds
-//   let inputsHashes = event.params.inputsHashes
-//   let gasLimits = event.params.gasLimits
-//   let gasPxs = event.params.gasPxs
-//   let sender = event.params.sender
-
-//   for (let i = 0; i < taskIds.length; ++i) {
-//     createTask(taskIds[i], inputsHashes[i], gasLimits[i], gasPxs[i], sender, event)
-//   }
-// }
-
 export function handleReceiptFailed(event: ReceiptFailed): void {
   let taskId = event.params.taskId.toHexString()
   let task = Task.load(taskId)
 
   if (task != null) {
     task.status = 'ReceiptFailed'
-    task.changedAt = event.block.timestamp
-    task.changedAtBlock = event.block.number
-    task.changedAtTransaction = event.transaction.hash
+    task.modifiedAt = event.block.timestamp
+    task.modifiedAtBlock = event.block.number
+    task.modifiedAtTransaction = event.transaction.hash
 
     let state = getCurrentState(event.address)
-    state.tasksFailedCount = state.tasksFailedCount.plus(BIGINT_ONE)
+    state.failedTaskCount = state.failedTaskCount.plus(BIGINT_ONE)
     state.save()
 
     let epoch = Epoch.load(task.epoch)
-    epoch.tasksFailedCount = epoch.tasksFailedCount.plus(BIGINT_ONE)
+    epoch.failedTaskCount = epoch.failedTaskCount.plus(BIGINT_ONE)
     // epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed) - FIXME: needs to add gasUsed to event params
     // epoch.reward = epoch.reward.plus(reward) - FIXME: needs to add gasUsed to event params
     epoch.save()
@@ -83,16 +73,16 @@ export function handleReceiptFailedETH(event: ReceiptFailedETH): void {
 
   if (task != null) {
     task.status = 'ReceiptFailedETH'
-    task.changedAt = event.block.timestamp
-    task.changedAtBlock = event.block.number
-    task.changedAtTransaction = event.transaction.hash
+    task.modifiedAt = event.block.timestamp
+    task.modifiedAtBlock = event.block.number
+    task.modifiedAtTransaction = event.transaction.hash
 
     let state = getCurrentState(event.address)
-    state.tasksFailedCount = state.tasksFailedCount.plus(BIGINT_ONE)
+    state.failedTaskCount = state.failedTaskCount.plus(BIGINT_ONE)
     state.save()
 
     let epoch = Epoch.load(task.epoch)
-    epoch.tasksFailedCount = epoch.tasksFailedCount.plus(BIGINT_ONE)
+    epoch.failedTaskCount = epoch.failedTaskCount.plus(BIGINT_ONE)
     // epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed) - FIXME: needs to add gasUsed to event params
     // eepoch.reward = epoch.reward.plus(reward) - FIXME: needs to add gasUsed to event params
     epoch.save()
@@ -109,32 +99,44 @@ export function handleReceiptVerified(event: ReceiptVerified): void {
 
   if (task != null) {
     task.status = 'ReceiptVerified'
-    task.scAddr = event.params.scAddr
+    task.secretContract = event.params.scAddr.toHexString()
     task.gasUsed = event.params.gasUsed
     task.worker = event.params.workerAddress.toHexString()
 
     task.optionalEthereumContractAddress = event.params.optionalEthereumContractAddress
 
-    task.changedAt = event.block.timestamp
-    task.changedAtBlock = event.block.number
-    task.changedAtTransaction = event.transaction.hash
+    task.modifiedAt = event.block.timestamp
+    task.modifiedAtBlock = event.block.number
+    task.modifiedAtTransaction = event.transaction.hash
 
     let state = getCurrentState(event.address)
-    state.tasksCompletedCount = state.tasksCompletedCount.plus(BIGINT_ONE)
+    state.completedTaskCount = state.completedTaskCount.plus(BIGINT_ONE)
     state.save()
 
-    let reward = task.gasPx.times(BigDecimal.fromString(task.gasUsed.toString()))
+    let reward = task.gasPrice.times(BigDecimal.fromString(task.gasUsed.toString()))
 
     let worker = Worker.load(event.params.workerAddress.toHexString())
-    worker.tasksCompletedCount = worker.tasksCompletedCount.plus(BIGINT_ONE)
+    worker.completedTaskCount = worker.completedTaskCount.plus(BIGINT_ONE)
     worker.reward = worker.reward.plus(reward)
     worker.save()
 
     let epoch = Epoch.load(task.epoch)
-    epoch.tasksCompletedCount = epoch.tasksCompletedCount.plus(BIGINT_ONE)
+    epoch.completedTaskCount = epoch.completedTaskCount.plus(BIGINT_ONE)
     epoch.gasUsed = epoch.gasUsed.plus(event.params.gasUsed)
     epoch.reward = epoch.reward.plus(reward)
     epoch.save()
+
+    let secretContract = SecretContract.load(event.params.scAddr.toHexString())
+    secretContract.taskCount = secretContract.taskCount.plus(BIGINT_ONE)
+    let users = secretContract.users || new Array<string>()
+
+    if (users.indexOf(task.sender.toHexString()) == -1) {
+      users.push(task.sender.toHexString())
+    }
+
+    secretContract.userCount = BigInt.fromI32(users.length)
+    secretContract.users = users
+    secretContract.save()
 
     task.save()
   } else {
@@ -142,22 +144,20 @@ export function handleReceiptVerified(event: ReceiptVerified): void {
   }
 }
 
-// export function handleReceiptsVerified(event: ReceiptsVerified): void {}
-
 export function handleTaskFeeReturned(event: TaskFeeReturned): void {}
 
 function createTask(
   taskId: Bytes,
   inputsHash: Bytes,
   gasLimit: BigInt,
-  gasPx: BigInt,
+  gasPrice: BigInt,
   sender: Address,
   event: EthereumEvent,
 ): Task {
   let task = new Task(taskId.toHexString())
   task.inputsHash = inputsHash
   task.gasLimit = toDecimal(gasLimit)
-  task.gasPx = toDecimal(gasPx)
+  task.gasPrice = toDecimal(gasPrice)
   task.sender = sender
   task.status = 'RecordCreated'
 
@@ -166,16 +166,25 @@ function createTask(
   task.createdAtTransaction = event.transaction.hash
 
   let state = getCurrentState(event.address)
-  state.tasksCount = state.tasksCount.plus(BIGINT_ONE)
+  state.taskCount = state.taskCount.plus(BIGINT_ONE)
   state.save()
 
   task.epoch = state.latestEpoch
 
   let epoch = Epoch.load(state.latestEpoch)
-  epoch.tasksCount = epoch.tasksCount.plus(BIGINT_ONE)
+  epoch.taskCount = epoch.taskCount.plus(BIGINT_ONE)
+
+  let users = epoch.users || new Array<string>()
+
+  if (users.indexOf(sender.toHexString()) == -1) {
+    users.push(sender.toHexString())
+  }
+
+  epoch.userCount = BigInt.fromI32(users.length)
+  epoch.users = users
   epoch.save()
 
-  task.order = state.tasksCount
+  task.order = state.taskCount
   task.save()
 
   return task

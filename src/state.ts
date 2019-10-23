@@ -22,10 +22,10 @@ export function getCurrentState(principal?: Address): EnigmaState {
       state.epochSize = BigInt.fromI32(0)
     }
 
-    state.tasksCount = BIGINT_ZERO
-    state.tasksCompletedCount = BIGINT_ZERO
-    state.tasksFailedCount = BIGINT_ZERO
-    state.workersCount = BIGINT_ZERO
+    state.taskCount = BIGINT_ZERO
+    state.completedTaskCount = BIGINT_ZERO
+    state.failedTaskCount = BIGINT_ZERO
+    state.workerCount = BIGINT_ZERO
 
     state.save()
   }
