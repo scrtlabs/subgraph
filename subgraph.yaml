@@ -6,7 +6,7 @@ dataSources:
     kind: ethereum/contract
     network: mainnet
     source:
-      abi: EnigmaEvents
+      abi: Enigma
       address: '0x59d3631c86bbe35ef041872d502f218a39fba150'
     mapping:
       kind: ethereum/events
@@ -14,6 +14,8 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/index.ts
       abis:
+        - name: Enigma
+          file: ./abis/Enigma.json
         - name: EnigmaEvents
           file: ./abis/EnigmaEvents.json
         - name: EnigmaStorage
@@ -32,10 +34,8 @@ dataSources:
           handler: handleReceiptFailed
         - event: ReceiptFailedETH(bytes32,bytes)
           handler: handleReceiptFailedETH
-        - event: ReceiptVerified(bytes32,bytes32,bytes32,bytes32,uint256,uint256,bytes,address,bytes)
+        - event: ReceiptVerified(bytes32,bytes32,bytes32,bytes32,uint256,uint256,bytes,address,address,bytes)
           handler: handleReceiptVerified
-        - event: ReceiptsVerified(bytes32[],bytes32[],bytes32[],bytes,address,bytes)
-          handler: handleReceiptsVerified
         - event: Registered(address,address)
           handler: handleWorkerRegistration
         - event: SecretContractDeployed(bytes32,bytes32,bytes32)
@@ -44,10 +44,6 @@ dataSources:
           handler: handleTaskFeeReturned
         - event: TaskRecordCreated(bytes32,bytes32,uint64,uint64,address,uint256)
           handler: handleTaskRecordCreated
-        - event: TaskRecordsCreated(bytes32[],bytes32[],uint64[],uint64[],address,uint256)
-          handler: handleTaskRecordsCreated
-        - event: ValidatedSig(bytes,bytes32,address)
-          handler: handleValidatedSig
         - event: WithdrawSuccessful(address,uint256)
           handler: handleWorkerWithdraw
         - event: WorkersParameterized(uint256,uint256,uint256,address[],uint256[],uint256)

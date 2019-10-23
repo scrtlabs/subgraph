@@ -1,11 +1,11 @@
 export {
   handleSecretContractDeployment,
   handleTaskRecordCreated,
-  handleTaskRecordsCreated,
+  // handleTaskRecordsCreated,
   handleReceiptFailed,
   handleReceiptFailedETH,
   handleReceiptVerified,
-  handleReceiptsVerified,
+  // handleReceiptsVerified,
   handleTaskFeeReturned,
 } from './tasks'
 
@@ -13,6 +13,6 @@ export {
   handleWorkerRegistration,
   handleWorkerDeposit,
   handleWorkerWithdraw,
-  handleValidatedSig,
+  // handleValidatedSig,
   handleWorkersParameterized,
 } from './workers'
