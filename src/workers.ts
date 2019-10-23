@@ -34,6 +34,10 @@ export function handleWorkerRegistration(event: Registered): void {
   let workerSigner = new WorkerSigner(event.params.signer.toHexString())
   workerSigner.custodianAddress = event.params.custodian
   workerSigner.save()
+
+  let state = getCurrentState(event.address)
+  state.workerCount = state.workerCount.plus(BIGINT_ONE)
+  state.save()
 }
 
 export function handleWorkerDeposit(event: DepositSuccessful): void {
@@ -111,8 +115,6 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
 
   // Save epoch as the latest one
   state.latestEpoch = epoch.id
-
-  state.workerCount = state.workerCount.plus(BIGINT_ONE)
 
   state.save()
 }
