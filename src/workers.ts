@@ -77,6 +77,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   epoch.workers = new Array<string>()
 
   epoch.endTime = BIGINT_ZERO
+  epoch.endBlockNumber = BIGINT_ZERO
   epoch.workerCount = BIGINT_ZERO
   epoch.taskCount = BIGINT_ZERO
   epoch.completedTaskCount = BIGINT_ZERO
@@ -118,6 +119,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   if (event.params.nonce.notEqual(BIGINT_ZERO)) {
     let prevEpoch = Epoch.load(state.latestEpoch)
     prevEpoch.endTime = event.block.timestamp
+    prevEpoch.endBlockNumber = event.block.number.minus(BIGINT_ONE)
     prevEpoch.save()
   }
 
