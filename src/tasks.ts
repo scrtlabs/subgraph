@@ -7,7 +7,7 @@ import {
   SecretContractDeployed,
   TaskFeeReturned,
   TaskRecordCreated,
-} from '../generated/EnigmaSimulation/EnigmaEvents'
+} from '../generated/EnigmaSimulation/Enigma'
 
 import { SecretContract, Task, Worker, Epoch } from '../generated/schema'
 
@@ -28,6 +28,42 @@ export function handleSecretContractDeployment(event: SecretContractDeployed): v
   secretContract.userCount = BIGINT_ZERO
 
   secretContract.save()
+
+  let taskId = event.params.scAddr.toHexString()
+  let task = Task.load(taskId)
+
+  if (task != null) {
+    task.status = 'ReceiptVerified'
+    task.secretContract = event.params.scAddr.toHexString()
+    task.gasUsed = event.params.gasUsed
+    task.worker = event.params.workerAddress.toHexString()
+    task.optionalEthereumContractAddress = event.params.optionalEthereumContractAddress
+
+    task.modifiedAt = event.block.timestamp
+    task.modifiedAtBlock = event.block.number
+    task.modifiedAtTransaction = event.transaction.hash
+
+    let state = getCurrentState(event.address)
+    state.completedTaskCount = state.completedTaskCount.plus(BIGINT_ONE)
+    state.save()
+
+    let reward = task.gasPrice.times(BigDecimal.fromString(task.gasUsed.toString()))
+
+    let worker = Worker.load(event.params.workerAddress.toHexString())
+    worker.completedTaskCount = worker.completedTaskCount.plus(BIGINT_ONE)
+    worker.reward = worker.reward.plus(reward)
+    worker.save()
+
+    let epoch = Epoch.load(task.epoch)
+    epoch.completedTaskCount = epoch.completedTaskCount.plus(BIGINT_ONE)
+    epoch.gasUsed = epoch.gasUsed.plus(event.params.gasUsed)
+    epoch.reward = epoch.reward.plus(reward)
+    epoch.save()
+
+    task.save()
+  } else {
+    log.warning('Task #{} not found', [taskId])
+  }
 }
 
 export function handleTaskRecordCreated(event: TaskRecordCreated): void {
@@ -47,6 +83,10 @@ export function handleReceiptFailed(event: ReceiptFailed): void {
 
   if (task != null) {
     task.status = 'ReceiptFailed'
+    task.secretContract = event.params.scAddr.toHexString()
+    task.gasUsed = event.params.gasUsed
+    task.worker = event.params.workerAddress.toHexString()
+
     task.modifiedAt = event.block.timestamp
     task.modifiedAtBlock = event.block.number
     task.modifiedAtTransaction = event.transaction.hash
@@ -55,10 +95,17 @@ export function handleReceiptFailed(event: ReceiptFailed): void {
     state.failedTaskCount = state.failedTaskCount.plus(BIGINT_ONE)
     state.save()
 
+    let reward = task.gasPrice.times(BigDecimal.fromString(task.gasUsed.toString()))
+
+    let worker = Worker.load(event.params.workerAddress.toHexString())
+    worker.failedTaskCount = worker.failedTaskCount.plus(BIGINT_ONE)
+    worker.reward = worker.reward.plus(reward)
+    worker.save()
+
     let epoch = Epoch.load(task.epoch)
     epoch.failedTaskCount = epoch.failedTaskCount.plus(BIGINT_ONE)
-    // epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed) - FIXME: needs to add gasUsed to event params
-    // epoch.reward = epoch.reward.plus(reward) - FIXME: needs to add gasUsed to event params
+    epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed as BigInt)
+    epoch.reward = epoch.reward.plus(reward)
     epoch.save()
 
     task.save()
@@ -73,6 +120,10 @@ export function handleReceiptFailedETH(event: ReceiptFailedETH): void {
 
   if (task != null) {
     task.status = 'ReceiptFailedETH'
+    task.secretContract = event.params.scAddr.toHexString()
+    task.gasUsed = event.params.gasUsed
+    task.worker = event.params.workerAddress.toHexString()
+
     task.modifiedAt = event.block.timestamp
     task.modifiedAtBlock = event.block.number
     task.modifiedAtTransaction = event.transaction.hash
@@ -81,10 +132,17 @@ export function handleReceiptFailedETH(event: ReceiptFailedETH): void {
     state.failedTaskCount = state.failedTaskCount.plus(BIGINT_ONE)
     state.save()
 
+    let reward = task.gasPrice.times(BigDecimal.fromString(task.gasUsed.toString()))
+
+    let worker = Worker.load(event.params.workerAddress.toHexString())
+    worker.failedTaskCount = worker.failedTaskCount.plus(BIGINT_ONE)
+    worker.reward = worker.reward.plus(reward)
+    worker.save()
+
     let epoch = Epoch.load(task.epoch)
     epoch.failedTaskCount = epoch.failedTaskCount.plus(BIGINT_ONE)
-    // epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed) - FIXME: needs to add gasUsed to event params
-    // eepoch.reward = epoch.reward.plus(reward) - FIXME: needs to add gasUsed to event params
+    epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed as BigInt)
+    epoch.reward = epoch.reward.plus(reward)
     epoch.save()
 
     task.save()
