@@ -43,9 +43,6 @@ type Epoch @entity {
   " Creation timestamp as seconds "
   startTime: BigInt!
 
-  " End timestamp as seconds "
-  endTime: BigInt!
-
   " Number of active workers "
   workerCount: BigInt!
 
