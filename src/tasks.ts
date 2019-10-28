@@ -13,7 +13,7 @@ import { SecretContract, Task, Worker, Epoch } from '../generated/schema'
 
 import { toDecimal } from './token'
 import { getCurrentState } from './state'
-import { BIGINT_ONE, BIGINT_ZERO } from './helpers'
+import { BIGINT_ONE, BIGINT_ZERO, isZeroAddress } from './helpers'
 
 export function handleSecretContractDeployment(event: SecretContractDeployed): void {
   let secretContract = new SecretContract(event.params.scAddr.toHexString())
@@ -26,6 +26,15 @@ export function handleSecretContractDeployment(event: SecretContractDeployed): v
   secretContract.createdAtTransaction = event.transaction.hash
   secretContract.taskCount = BIGINT_ZERO
   secretContract.userCount = BIGINT_ZERO
+  secretContract.ehtContractsCount = BIGINT_ZERO
+
+  if (!isZeroAddress(event.params.optionalEthereumContractAddress)) {
+    let ethContracts = new Array<string>()
+    ethContracts.push(event.params.optionalEthereumContractAddress.toHexString())
+
+    secretContract.ehtContracts = ethContracts
+    secretContract.ehtContractsCount = secretContract.ehtContractsCount.plus(BIGINT_ONE)
+  }
 
   secretContract.save()
 
@@ -190,6 +199,17 @@ export function handleReceiptVerified(event: ReceiptVerified): void {
 
     if (users.indexOf(task.sender.toHexString()) == -1) {
       users.push(task.sender.toHexString())
+    }
+
+    if (!isZeroAddress(event.params.optionalEthereumContractAddress)) {
+      let ethContracts = secretContract.ehtContracts || new Array<string>()
+
+      if (ethContracts.indexOf(event.params.optionalEthereumContractAddress.toHexString()) == -1) {
+        ethContracts.push(event.params.optionalEthereumContractAddress.toHexString())
+      }
+
+      secretContract.ehtContracts = ethContracts
+      secretContract.ehtContractsCount = BigInt.fromI32(ethContracts.length)
     }
 
     secretContract.userCount = BigInt.fromI32(users.length)
