@@ -52,6 +52,9 @@ type Epoch @entity {
   " Active workers in the epoch "
   workers: [Worker!]!
 
+  " Active workers stakes the epoch "
+  stakes: [BigInt!]
+
   " ENG gas used during this epoch"
   gasUsed: BigInt
 
@@ -135,7 +138,7 @@ type Task @entity {
   sender: Bytes!
 
   " Task status "
-  status: TaskStatus!
+  status: String!
 
   " Secret contract address "
   secretContract: SecretContract
@@ -166,15 +169,6 @@ type Task @entity {
 
   " Last status change (complete or fail) transaction hash "
   modifiedAtTransaction: Bytes
-}
-
-enum TaskStatus {
-  RecordUndefined
-  RecordCreated
-  ReceiptVerified
-  ReceiptFailed
-  ReceiptFailedETH
-  ReceiptFailedReturn
 }
 
 " The data representation of a worker (or node) "

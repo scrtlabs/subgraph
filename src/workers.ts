@@ -1,4 +1,4 @@
-import { BigDecimal, log } from '@graphprotocol/graph-ts'
+import { BigDecimal, log, BigInt } from '@graphprotocol/graph-ts'
 
 import {
   DepositSuccessful,
@@ -75,6 +75,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   epoch.startTime = event.block.timestamp
   epoch.order = event.params.nonce
   epoch.workers = new Array<string>()
+  epoch.stakes = new Array<BigInt>()
 
   epoch.endTime = BIGINT_ZERO
   epoch.endBlockNumber = BIGINT_ZERO
@@ -106,6 +107,9 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
         worker.save()
         epoch.workers = epoch.workers.concat([workerId])
         epoch.workerCount = epoch.workerCount.plus(BIGINT_ONE)
+
+        let workerStake = (event.params.stakes as BigInt[])[w]
+        epoch.stakes = epoch.stakes.concat([workerStake])
       } else {
         log.warning('Worker #{} not found', [workerId])
       }
