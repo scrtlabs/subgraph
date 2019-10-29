@@ -26,14 +26,14 @@ export function handleSecretContractDeployment(event: SecretContractDeployed): v
   secretContract.createdAtTransaction = event.transaction.hash
   secretContract.taskCount = BIGINT_ZERO
   secretContract.userCount = BIGINT_ZERO
-  secretContract.ehtContractsCount = BIGINT_ZERO
+  secretContract.ethContractCount = BIGINT_ZERO
 
   if (!isZeroAddress(event.params.optionalEthereumContractAddress)) {
     let ethContracts = new Array<string>()
     ethContracts.push(event.params.optionalEthereumContractAddress.toHexString())
 
-    secretContract.ehtContracts = ethContracts
-    secretContract.ehtContractsCount = secretContract.ehtContractsCount.plus(BIGINT_ONE)
+    secretContract.ethContracts = ethContracts
+    secretContract.ethContractCount = secretContract.ethContractCount.plus(BIGINT_ONE)
   }
 
   secretContract.save()
@@ -202,14 +202,14 @@ export function handleReceiptVerified(event: ReceiptVerified): void {
     }
 
     if (!isZeroAddress(event.params.optionalEthereumContractAddress)) {
-      let ethContracts = secretContract.ehtContracts || new Array<string>()
+      let ethContracts = secretContract.ethContracts || new Array<string>()
 
       if (ethContracts.indexOf(event.params.optionalEthereumContractAddress.toHexString()) == -1) {
         ethContracts.push(event.params.optionalEthereumContractAddress.toHexString())
       }
 
-      secretContract.ehtContracts = ethContracts
-      secretContract.ehtContractsCount = BigInt.fromI32(ethContracts.length)
+      secretContract.ethContracts = ethContracts
+      secretContract.ethContractCount = BigInt.fromI32(ethContracts.length)
     }
 
     secretContract.userCount = BigInt.fromI32(users.length)

@@ -99,11 +99,11 @@ type SecretContract @entity {
   " List of unique addresses using this SC "
   users: [String!]
 
-  " Number of unique eht contracts addresses using called by this SC "
-  ehtContractsCount: BigInt
+  " Number of unique eth contract addresseses called by this SC "
+  ethContractCount: BigInt
 
-  " List of unique eht contracts addresses using called by this SC "
-  ehtContracts: [String!]
+  " List of unique eth contract addresseses called by this SC "
+  ethContracts: [String!]
 
   " Creation timestamp as seconds "
   createdAt: BigInt!
