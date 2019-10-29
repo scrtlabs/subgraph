@@ -266,3 +266,10 @@ enum WorkerLogType {
   LogOut
   Compound
 }
+
+type Statistic @entity {
+  id: ID!
+  taskCount: BigInt!
+  completedTaskCount: BigInt!
+  failedTaskCount: BigInt!
+}

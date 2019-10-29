@@ -9,11 +9,11 @@ import {
   TaskRecordCreated,
 } from '../generated/EnigmaSimulation/Enigma'
 
-import { SecretContract, Task, Worker, Epoch } from '../generated/schema'
+import { SecretContract, Task, Worker, Epoch, Statistic } from '../generated/schema'
 
 import { toDecimal } from './token'
 import { getCurrentState } from './state'
-import { BIGINT_ONE, BIGINT_ZERO, isZeroAddress } from './helpers'
+import { BIGINT_ONE, BIGINT_ZERO, DAY_IN_SECONDS, HOUR_IN_SECONDS, isZeroAddress, BIGDECIMAL_ONE } from './helpers'
 
 export function handleSecretContractDeployment(event: SecretContractDeployed): void {
   let secretContract = new SecretContract(event.params.scAddr.toHexString())
@@ -70,6 +70,14 @@ export function handleSecretContractDeployment(event: SecretContractDeployed): v
     epoch.save()
 
     task.save()
+
+    let dailyStatistics = getStatistics(getDayId(event.block.timestamp))
+    dailyStatistics.completedTaskCount = dailyStatistics.completedTaskCount.plus(BIGINT_ONE)
+    dailyStatistics.save()
+
+    let hourlyStatistics = getStatistics(getHourId(event.block.timestamp))
+    hourlyStatistics.completedTaskCount = hourlyStatistics.completedTaskCount.plus(BIGINT_ONE)
+    hourlyStatistics.save()
   } else {
     log.warning('Task #{} not found', [taskId])
   }
@@ -132,6 +140,13 @@ export function handleReceiptFailed(event: ReceiptFailed): void {
     }
 
     task.save()
+    let dailyStatistics = getStatistics(getDayId(event.block.timestamp))
+    dailyStatistics.failedTaskCount = dailyStatistics.failedTaskCount.plus(BIGINT_ONE)
+    dailyStatistics.save()
+
+    let hourlyStatistics = getStatistics(getHourId(event.block.timestamp))
+    hourlyStatistics.failedTaskCount = hourlyStatistics.failedTaskCount.plus(BIGINT_ONE)
+    hourlyStatistics.save()
   } else {
     log.warning('Task #{} not found', [taskId])
   }
@@ -183,6 +198,14 @@ export function handleReceiptFailedETH(event: ReceiptFailedETH): void {
     }
 
     task.save()
+
+    let dailyStatistics = getStatistics(getDayId(event.block.timestamp))
+    dailyStatistics.failedTaskCount = dailyStatistics.failedTaskCount.plus(BIGINT_ONE)
+    dailyStatistics.save()
+
+    let hourlyStatistics = getStatistics(getHourId(event.block.timestamp))
+    hourlyStatistics.failedTaskCount = hourlyStatistics.failedTaskCount.plus(BIGINT_ONE)
+    hourlyStatistics.save()
   } else {
     log.warning('Task #{} not found', [taskId])
   }
@@ -245,6 +268,14 @@ export function handleReceiptVerified(event: ReceiptVerified): void {
     secretContract.save()
 
     task.save()
+
+    let dailyStatistics = getStatistics(getDayId(event.block.timestamp))
+    dailyStatistics.completedTaskCount = dailyStatistics.completedTaskCount.plus(BIGINT_ONE)
+    dailyStatistics.save()
+
+    let hourlyStatistics = getStatistics(getHourId(event.block.timestamp))
+    hourlyStatistics.completedTaskCount = hourlyStatistics.completedTaskCount.plus(BIGINT_ONE)
+    hourlyStatistics.save()
   } else {
     log.warning('Task #{} not found', [taskId])
   }
@@ -293,5 +324,34 @@ function createTask(
   task.order = state.taskCount
   task.save()
 
+  let dailyStatistics = getStatistics(getDayId(event.block.timestamp))
+  dailyStatistics.taskCount = dailyStatistics.taskCount.plus(BIGINT_ONE)
+  dailyStatistics.save()
+
+  let hourlyStatistics = getStatistics(getHourId(event.block.timestamp))
+  hourlyStatistics.taskCount = hourlyStatistics.taskCount.plus(BIGINT_ONE)
+  hourlyStatistics.save()
+
   return task
+}
+
+function getStatistics(id: string): Statistic {
+  let statistics = Statistic.load(id)
+  if (statistics == null) {
+    statistics = new Statistic(id)
+    statistics.taskCount = BIGINT_ZERO
+    statistics.completedTaskCount = BIGINT_ZERO
+    statistics.failedTaskCount = BIGINT_ZERO
+
+    statistics.save()
+  }
+  return statistics as Statistic
+}
+
+function getDayId(timestamp: BigInt): string {
+  return 'DAY-' + timestamp.divDecimal(DAY_IN_SECONDS).truncate(0).toString()
+}
+
+function getHourId(timestamp: BigInt): string {
+  return 'HOUR-' + timestamp.divDecimal(HOUR_IN_SECONDS).truncate(0).toString()
 }
