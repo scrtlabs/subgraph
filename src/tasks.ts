@@ -117,6 +117,20 @@ export function handleReceiptFailed(event: ReceiptFailed): void {
     epoch.reward = epoch.reward.plus(reward)
     epoch.save()
 
+    let secretContract = SecretContract.load(event.params.scAddr.toHexString())
+    if (secretContract != null) {
+      secretContract.taskCount = secretContract.taskCount.plus(BIGINT_ONE)
+      let users = secretContract.users || new Array<string>()
+
+      if (users.indexOf(task.sender.toHexString()) == -1) {
+        users.push(task.sender.toHexString())
+      }
+
+      secretContract.userCount = BigInt.fromI32(users.length)
+      secretContract.users = users
+      secretContract.save()
+    }
+
     task.save()
   } else {
     log.warning('Task #{} not found', [taskId])
@@ -153,6 +167,20 @@ export function handleReceiptFailedETH(event: ReceiptFailedETH): void {
     epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed as BigInt)
     epoch.reward = epoch.reward.plus(reward)
     epoch.save()
+
+    let secretContract = SecretContract.load(event.params.scAddr.toHexString())
+    if (secretContract != null) {
+      secretContract.taskCount = secretContract.taskCount.plus(BIGINT_ONE)
+      let users = secretContract.users || new Array<string>()
+
+      if (users.indexOf(task.sender.toHexString()) == -1) {
+        users.push(task.sender.toHexString())
+      }
+
+      secretContract.userCount = BigInt.fromI32(users.length)
+      secretContract.users = users
+      secretContract.save()
+    }
 
     task.save()
   } else {
