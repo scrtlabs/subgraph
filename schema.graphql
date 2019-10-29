@@ -50,7 +50,7 @@ type Epoch @entity {
   workers: [Worker!]!
 
   " Active workers stakes the epoch "
-  stakes: [BigInt!]
+  stakes: [BigDecimal!]
 
   " ENG gas used during this epoch"
   gasUsed: BigInt

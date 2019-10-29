@@ -75,7 +75,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   epoch.startTime = event.block.timestamp
   epoch.order = event.params.nonce
   epoch.workers = new Array<string>()
-  epoch.stakes = new Array<BigInt>()
+  epoch.stakes = new Array<BigDecimal>()
 
   epoch.endBlockNumber = BIGINT_ZERO
   epoch.workerCount = BIGINT_ZERO
@@ -108,7 +108,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
         epoch.workerCount = epoch.workerCount.plus(BIGINT_ONE)
 
         let workerStake = (event.params.stakes as BigInt[])[w]
-        epoch.stakes = epoch.stakes.concat([workerStake])
+        epoch.stakes = epoch.stakes.concat([toDecimal(workerStake)])
       } else {
         log.warning('Worker #{} not found', [workerId])
       }
