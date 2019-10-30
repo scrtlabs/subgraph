@@ -70,7 +70,7 @@ type Epoch @entity {
   " Number of unique Users for this Epoch "
   userCount: BigInt
 
-  " List of unique addresses using this SC "
+  " List of unique user addresses using this SC "
   users: [String!]
 
   " Tasks created in the epoch "
@@ -96,7 +96,7 @@ type SecretContract @entity {
   " Number of unique Users using this SC "
   userCount: BigInt
 
-  " List of unique addresses using this SC "
+  " List of unique users addresses using this SC "
   users: [String!]
 
   " Number of unique eth contract addresseses called by this SC "
@@ -268,8 +268,50 @@ enum WorkerLogType {
 }
 
 type Statistic @entity {
+  " Equals to: <StatiscicType>-order "
   id: ID!
+
+  " Number of Tasks created during this range "
   taskCount: BigInt!
+
+  " Number of Tasks completed during this range "
   completedTaskCount: BigInt!
+
+  " Number of Tasks failed during this range "
   failedTaskCount: BigInt!
+
+  " Number of Epochs started during this range "
+  startedEpochCount: BigInt!
+
+  " Epochs started during this range "
+  startedEpochs: [Epoch!]
+
+  " Number of Epochs ended during this range "
+  endedEpochCount: BigInt!
+
+  " Epochs ended during this range "
+  endedEpochs: [Epoch!]
+
+  " Number of unique users addresses interacting in this range "
+  userCount: BigInt!
+
+  " List of unique users addresses interacting in this range "
+  users: [String!]
+
+  " Number of unique active workers during this range "
+  workerCount: BigInt!
+
+  " Unique active workers in the epoch during this range "
+  workers: [Worker!]
+
+  " Type of this range "
+  type: StatiscicType!
+
+  " Time stamp as hours or days depending of the type "
+  order: BigDecimal!
+}
+
+enum StatiscicType {
+  DAY
+  HOUR
 }

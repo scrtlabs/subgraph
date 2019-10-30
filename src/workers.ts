@@ -12,6 +12,7 @@ import { Epoch, Worker, WorkerSigner } from '../generated/schema'
 
 import { getCurrentState } from './state'
 import { toDecimal } from './token'
+import { addStatisticsEpoch, addStatisticsWorkers } from './statiscits'
 import { BIGINT_ZERO, BIGINT_ONE, BIGDECIMAL_ZERO, BIGDECIMAL_ONE } from './helpers'
 
 export function handleWorkerRegistration(event: Registered): void {
@@ -87,6 +88,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
 
   // Register active workers in the epoch
   let activeWorkers = event.params.workers.map<string>(w => w.toHexString())
+  let activeWorkerIds = new Array<string>()
 
   for (let w = 0; w < activeWorkers.length; ++w) {
     let workerSignerId = activeWorkers[w]
@@ -95,6 +97,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
     if (workerSigner != null) {
       let workerId = workerSigner.custodianAddress.toHexString()
       let worker = Worker.load(workerId)
+      activeWorkerIds.push(workerId)
 
       if (worker != null) {
         let workerEpochs = worker.epochs
@@ -124,6 +127,9 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
     prevEpoch.endBlockNumber =  event.params.firstBlockNumber.minus(BIGINT_ONE)
     prevEpoch.save()
   }
+
+  addStatisticsWorkers(event.block.timestamp, activeWorkerIds)
+  addStatisticsEpoch(event.block.timestamp, epoch.id, state.latestEpoch)
 
   // Save epoch as the latest one
   state.latestEpoch = epoch.id
