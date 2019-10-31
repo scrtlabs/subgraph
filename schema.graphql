@@ -52,6 +52,9 @@ type Epoch @entity {
   " Active workers stakes in the epoch "
   stakes: [BigDecimal!]
 
+  " Deployed secret contract until this epoch "
+  deployedSecretContracts: [String!]
+
   " ENG gas used during this epoch"
   gasUsed: BigInt
 

@@ -39,6 +39,14 @@ export function handleSecretContractDeployment(event: SecretContractDeployed): v
 
   secretContract.save()
 
+  let state = getCurrentState(event.address)
+  let currentEpoch = Epoch.load(state.latestEpoch)
+  let deployedSecretContracts = currentEpoch.deployedSecretContracts || new Array<string>()
+  deployedSecretContracts.push(event.params.scAddr.toHexString())
+  currentEpoch.deployedSecretContracts = deployedSecretContracts
+  currentEpoch.save()
+
+
   let taskId = event.params.scAddr.toHexString()
   let task = Task.load(taskId)
 

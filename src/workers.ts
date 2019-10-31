@@ -120,6 +120,14 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
     }
   }
 
+  if (event.params.nonce.notEqual(BIGINT_ZERO)) {
+    let prevEpoch = Epoch.load(state.latestEpoch)
+    prevEpoch.endBlockNumber =  event.params.firstBlockNumber.minus(BIGINT_ONE)
+    prevEpoch.save()
+
+    epoch.deployedSecretContracts = prevEpoch.deployedSecretContracts
+  }
+
   epoch.save()
 
   if (event.params.nonce.notEqual(BIGINT_ZERO)) {
