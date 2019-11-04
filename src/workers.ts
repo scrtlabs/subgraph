@@ -47,8 +47,13 @@ export function handleWorkerDeposit(event: DepositSuccessful): void {
   let worker = Worker.load(workerId)
 
   if (worker != null) {
-    worker.balance = worker.balance.plus(toDecimal(event.params.value))
+    let value = toDecimal(event.params.value)
+    worker.balance = worker.balance.plus(value)
     worker.save()
+
+    let state = getCurrentState(event.address)
+    state.staked = state.staked.plus(value)
+    state.save()
   } else {
     log.warning('Worker #{} not found', [workerId])
   }
@@ -59,8 +64,13 @@ export function handleWorkerWithdraw(event: WithdrawSuccessful): void {
   let worker = Worker.load(workerId)
 
   if (worker != null) {
-    worker.balance = worker.balance.minus(toDecimal(event.params.value))
+    let value = toDecimal(event.params.value)
+    worker.balance = worker.balance.minus(value)
     worker.save()
+
+    let state = getCurrentState(event.address)
+    state.staked = state.staked.minus(value)
+    state.save()
   } else {
     log.warning('Worker #{} not found', [workerId])
   }

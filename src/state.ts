@@ -4,7 +4,7 @@ import { Enigma } from '../generated/EnigmaSimulation/Enigma'
 
 import { EnigmaState } from '../generated/schema'
 
-import { BIGINT_ZERO } from './helpers'
+import { BIGINT_ZERO, BIGDECIMAL_ZERO } from './helpers'
 
 const ENIGMA_STATE_KEY = '0'
 
@@ -26,6 +26,8 @@ export function getCurrentState(principal?: Address): EnigmaState {
     state.completedTaskCount = BIGINT_ZERO
     state.failedTaskCount = BIGINT_ZERO
     state.workerCount = BIGINT_ZERO
+    state.staked = BIGDECIMAL_ZERO
+    state.userCount = BIGINT_ZERO
 
     state.save()
   }

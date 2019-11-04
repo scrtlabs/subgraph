@@ -290,6 +290,14 @@ function createTask(
 
   let state = getCurrentState(event.address)
   state.taskCount = state.taskCount.plus(BIGINT_ONE)
+
+  let stateUsers = state.users || new Array<string>()
+  if (stateUsers.indexOf(sender.toHexString()) == -1) {
+    stateUsers.push(sender.toHexString())
+  }
+
+  state.userCount = BigInt.fromI32(stateUsers.length)
+  state.users = stateUsers
   state.save()
 
   task.epoch = state.latestEpoch

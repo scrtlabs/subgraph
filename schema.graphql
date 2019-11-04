@@ -19,6 +19,15 @@ type EnigmaState @entity {
 
   " Number of Workers "
   workerCount: BigInt!
+
+  " Total ENG staked in Enigma network "
+  staked: BigDecimal!
+
+  " Number of unique Users that have ever interacted with the network "
+  userCount: BigInt!
+
+  " List of unique user addresses that ever interacted with the network "
+  users: [String!]
 }
 
 type Epoch @entity {
