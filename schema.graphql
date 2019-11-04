@@ -19,6 +19,15 @@ type EnigmaState @entity {
 
   " Number of Workers "
   workerCount: BigInt!
+
+  " Total ENG staked in Enigma network "
+  staked: BigDecimal!
+
+  " Number of unique Users that have ever interacted with the network "
+  userCount: BigInt!
+
+  " List of unique user addresses that ever interacted with the network "
+  users: [String!]
 }
 
 type Epoch @entity {
@@ -43,14 +52,17 @@ type Epoch @entity {
   " Creation timestamp as seconds "
   startTime: BigInt!
 
-  " End timestamp as seconds "
-  endTime: BigInt!
-
   " Number of active workers "
   workerCount: BigInt!
 
   " Active workers in the epoch "
   workers: [Worker!]!
+
+  " Active workers stakes in the epoch "
+  stakes: [BigDecimal!]
+
+  " Deployed secret contract until this epoch "
+  deployedSecretContracts: [String!]
 
   " ENG gas used during this epoch"
   gasUsed: BigInt
@@ -70,7 +82,7 @@ type Epoch @entity {
   " Number of unique Users for this Epoch "
   userCount: BigInt
 
-  " List of unique addresses using this SC "
+  " List of unique user addresses interacting with the network within the epoch "
   users: [String!]
 
   " Tasks created in the epoch "
@@ -90,14 +102,20 @@ type SecretContract @entity {
   " Initial state delta hash as a result of the contract's constructor "
   initStateDeltaHash: Bytes!
 
-  " Number of Tasks using this SC"
+  " Number of Tasks using this secret contract"
   taskCount: BigInt
 
-  " Number of unique Users using this SC "
+  " Number of unique Users using this secret contract "
   userCount: BigInt
 
-  " List of unique addresses using this SC "
+  " List of unique users addresses using this secret contract "
   users: [String!]
+
+  " Number of unique eth contract addresseses called by this secret contract "
+  ethContractCount: BigInt
+
+  " List of unique eth contract addresseses called by this secret contract "
+  ethContracts: [String!]
 
   " Creation timestamp as seconds "
   createdAt: BigInt!
@@ -135,7 +153,7 @@ type Task @entity {
   sender: Bytes!
 
   " Task status "
-  status: TaskStatus!
+  status: String!
 
   " Secret contract address "
   secretContract: SecretContract
@@ -166,15 +184,6 @@ type Task @entity {
 
   " Last status change (complete or fail) transaction hash "
   modifiedAtTransaction: Bytes
-}
-
-enum TaskStatus {
-  RecordUndefined
-  RecordCreated
-  ReceiptVerified
-  ReceiptFailed
-  ReceiptFailedETH
-  ReceiptFailedReturn
 }
 
 " The data representation of a worker (or node) "
@@ -268,4 +277,53 @@ enum WorkerLogType {
   LogIn
   LogOut
   Compound
+}
+
+type Statistic @entity {
+  " Equals to: <StatisticType>-order "
+  id: ID!
+
+  " Number of Tasks created during this range "
+  taskCount: BigInt!
+
+  " Number of Tasks completed during this range "
+  completedTaskCount: BigInt!
+
+  " Number of Tasks failed during this range "
+  failedTaskCount: BigInt!
+
+  " Number of Epochs started during this range "
+  startedEpochCount: BigInt!
+
+  " Epochs started during this range "
+  startedEpochs: [Epoch!]
+
+  " Number of Epochs ended during this range "
+  endedEpochCount: BigInt!
+
+  " Epochs ended during this range "
+  endedEpochs: [Epoch!]
+
+  " Number of unique users addresses interacting in this range "
+  userCount: BigInt!
+
+  " List of unique users addresses interacting in this range "
+  users: [String!]
+
+  " Number of unique active workers during this range "
+  workerCount: BigInt!
+
+  " Unique active workers in the epoch during this range "
+  workers: [Worker!]
+
+  " Type of this range "
+  type: StatisticType!
+
+  " Time stamp as hours or days depending of the type "
+  order: BigDecimal!
+}
+
+enum StatisticType {
+  DAY
+  HOUR
 }

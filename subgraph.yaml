@@ -16,10 +16,6 @@ dataSources:
       abis:
         - name: Enigma
           file: ./abis/Enigma.json
-        - name: EnigmaEvents
-          file: ./abis/EnigmaEvents.json
-        - name: EnigmaStorage
-          file: ./abis/EnigmaStorage.json
       entities:
         - EnigmaState
         - Epoch
@@ -30,15 +26,15 @@ dataSources:
       eventHandlers:
         - event: DepositSuccessful(address,uint256)
           handler: handleWorkerDeposit
-        - event: ReceiptFailed(bytes32,bytes)
+        - event: ReceiptFailed(bytes32,bytes32,uint256,address,bytes)
           handler: handleReceiptFailed
-        - event: ReceiptFailedETH(bytes32,bytes)
+        - event: ReceiptFailedETH(bytes32,bytes32,uint256,address,bytes)
           handler: handleReceiptFailedETH
         - event: ReceiptVerified(bytes32,bytes32,bytes32,bytes32,uint256,uint256,bytes,address,address,bytes)
           handler: handleReceiptVerified
         - event: Registered(address,address)
           handler: handleWorkerRegistration
-        - event: SecretContractDeployed(bytes32,bytes32,bytes32)
+        - event: SecretContractDeployed(bytes32,bytes32,bytes32,uint256,bytes,address,address)
           handler: handleSecretContractDeployment
         - event: TaskFeeReturned(bytes32)
           handler: handleTaskFeeReturned

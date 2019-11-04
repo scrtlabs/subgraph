@@ -1,4 +1,4 @@
-import { BigDecimal, log } from '@graphprotocol/graph-ts'
+import { BigDecimal, log, BigInt } from '@graphprotocol/graph-ts'
 
 import {
   DepositSuccessful,
@@ -12,6 +12,7 @@ import { Epoch, Worker, WorkerSigner } from '../generated/schema'
 
 import { getCurrentState } from './state'
 import { toDecimal } from './token'
+import { addStatisticsEpoch, addStatisticsWorkers } from './statiscits'
 import { BIGINT_ZERO, BIGINT_ONE, BIGDECIMAL_ZERO, BIGDECIMAL_ONE } from './helpers'
 
 export function handleWorkerRegistration(event: Registered): void {
@@ -46,8 +47,13 @@ export function handleWorkerDeposit(event: DepositSuccessful): void {
   let worker = Worker.load(workerId)
 
   if (worker != null) {
-    worker.balance = worker.balance.plus(toDecimal(event.params.value))
+    let value = toDecimal(event.params.value)
+    worker.balance = worker.balance.plus(value)
     worker.save()
+
+    let state = getCurrentState(event.address)
+    state.staked = state.staked.plus(value)
+    state.save()
   } else {
     log.warning('Worker #{} not found', [workerId])
   }
@@ -58,8 +64,13 @@ export function handleWorkerWithdraw(event: WithdrawSuccessful): void {
   let worker = Worker.load(workerId)
 
   if (worker != null) {
-    worker.balance = worker.balance.minus(toDecimal(event.params.value))
+    let value = toDecimal(event.params.value)
+    worker.balance = worker.balance.minus(value)
     worker.save()
+
+    let state = getCurrentState(event.address)
+    state.staked = state.staked.minus(value)
+    state.save()
   } else {
     log.warning('Worker #{} not found', [workerId])
   }
@@ -75,8 +86,8 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
   epoch.startTime = event.block.timestamp
   epoch.order = event.params.nonce
   epoch.workers = new Array<string>()
+  epoch.stakes = new Array<BigDecimal>()
 
-  epoch.endTime = BIGINT_ZERO
   epoch.endBlockNumber = BIGINT_ZERO
   epoch.workerCount = BIGINT_ZERO
   epoch.taskCount = BIGINT_ZERO
@@ -87,6 +98,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
 
   // Register active workers in the epoch
   let activeWorkers = event.params.workers.map<string>(w => w.toHexString())
+  let activeWorkerIds = new Array<string>()
 
   for (let w = 0; w < activeWorkers.length; ++w) {
     let workerSignerId = activeWorkers[w]
@@ -95,6 +107,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
     if (workerSigner != null) {
       let workerId = workerSigner.custodianAddress.toHexString()
       let worker = Worker.load(workerId)
+      activeWorkerIds.push(workerId)
 
       if (worker != null) {
         let workerEpochs = worker.epochs
@@ -106,6 +119,9 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
         worker.save()
         epoch.workers = epoch.workers.concat([workerId])
         epoch.workerCount = epoch.workerCount.plus(BIGINT_ONE)
+
+        let workerStake = (event.params.stakes as BigInt[])[w]
+        epoch.stakes = epoch.stakes.concat([toDecimal(workerStake)])
       } else {
         log.warning('Worker #{} not found', [workerId])
       }
@@ -114,14 +130,24 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
     }
   }
 
+  if (event.params.nonce.notEqual(BIGINT_ZERO)) {
+    let prevEpoch = Epoch.load(state.latestEpoch)
+    prevEpoch.endBlockNumber =  event.params.firstBlockNumber.minus(BIGINT_ONE)
+    prevEpoch.save()
+
+    epoch.deployedSecretContracts = prevEpoch.deployedSecretContracts
+  }
+
   epoch.save()
 
   if (event.params.nonce.notEqual(BIGINT_ZERO)) {
     let prevEpoch = Epoch.load(state.latestEpoch)
-    prevEpoch.endTime = event.block.timestamp
-    prevEpoch.endBlockNumber = event.block.number.minus(BIGINT_ONE)
+    prevEpoch.endBlockNumber =  event.params.firstBlockNumber.minus(BIGINT_ONE)
     prevEpoch.save()
   }
+
+  addStatisticsWorkers(event.block.timestamp, activeWorkerIds)
+  addStatisticsEpoch(event.block.timestamp, epoch.id, state.latestEpoch)
 
   // Save epoch as the latest one
   state.latestEpoch = epoch.id

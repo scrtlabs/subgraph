@@ -7,13 +7,14 @@ import {
   SecretContractDeployed,
   TaskFeeReturned,
   TaskRecordCreated,
-} from '../generated/EnigmaSimulation/EnigmaEvents'
+} from '../generated/EnigmaSimulation/Enigma'
 
 import { SecretContract, Task, Worker, Epoch } from '../generated/schema'
 
 import { toDecimal } from './token'
 import { getCurrentState } from './state'
-import { BIGINT_ONE, BIGINT_ZERO } from './helpers'
+import { addStatisticsTask, addStatisticsFailedTask, addStatisticsCompletedTask, addStatisticsUsers } from './statiscits'
+import { BIGINT_ONE, BIGINT_ZERO, isZeroAddress, BIGDECIMAL_ONE } from './helpers'
 
 export function handleSecretContractDeployment(event: SecretContractDeployed): void {
   let secretContract = new SecretContract(event.params.scAddr.toHexString())
@@ -26,8 +27,63 @@ export function handleSecretContractDeployment(event: SecretContractDeployed): v
   secretContract.createdAtTransaction = event.transaction.hash
   secretContract.taskCount = BIGINT_ZERO
   secretContract.userCount = BIGINT_ZERO
+  secretContract.ethContractCount = BIGINT_ZERO
+
+  if (!isZeroAddress(event.params.optionalEthereumContractAddress)) {
+    let ethContracts = new Array<string>()
+    ethContracts.push(event.params.optionalEthereumContractAddress.toHexString())
+
+    secretContract.ethContracts = ethContracts
+    secretContract.ethContractCount = secretContract.ethContractCount.plus(BIGINT_ONE)
+  }
 
   secretContract.save()
+
+  let state = getCurrentState(event.address)
+  let currentEpoch = Epoch.load(state.latestEpoch)
+  let deployedSecretContracts = currentEpoch.deployedSecretContracts || new Array<string>()
+  deployedSecretContracts.push(event.params.scAddr.toHexString())
+  currentEpoch.deployedSecretContracts = deployedSecretContracts
+  currentEpoch.save()
+
+
+  let taskId = event.params.scAddr.toHexString()
+  let task = Task.load(taskId)
+
+  if (task != null) {
+    task.status = 'ReceiptVerified'
+    task.secretContract = event.params.scAddr.toHexString()
+    task.gasUsed = event.params.gasUsed
+    task.worker = event.params.workerAddress.toHexString()
+    task.optionalEthereumContractAddress = event.params.optionalEthereumContractAddress
+
+    task.modifiedAt = event.block.timestamp
+    task.modifiedAtBlock = event.block.number
+    task.modifiedAtTransaction = event.transaction.hash
+
+    let state = getCurrentState(event.address)
+    state.completedTaskCount = state.completedTaskCount.plus(BIGINT_ONE)
+    state.save()
+
+    let reward = task.gasPrice.times(BigDecimal.fromString(task.gasUsed.toString()))
+
+    let worker = Worker.load(event.params.workerAddress.toHexString())
+    worker.completedTaskCount = worker.completedTaskCount.plus(BIGINT_ONE)
+    worker.reward = worker.reward.plus(reward)
+    worker.save()
+
+    let epoch = Epoch.load(task.epoch)
+    epoch.completedTaskCount = epoch.completedTaskCount.plus(BIGINT_ONE)
+    epoch.gasUsed = epoch.gasUsed.plus(event.params.gasUsed)
+    epoch.reward = epoch.reward.plus(reward)
+    epoch.save()
+
+    task.save()
+
+    addStatisticsCompletedTask(event.block.timestamp)
+  } else {
+    log.warning('Task #{} not found', [taskId])
+  }
 }
 
 export function handleTaskRecordCreated(event: TaskRecordCreated): void {
@@ -47,6 +103,10 @@ export function handleReceiptFailed(event: ReceiptFailed): void {
 
   if (task != null) {
     task.status = 'ReceiptFailed'
+    task.secretContract = event.params.scAddr.toHexString()
+    task.gasUsed = event.params.gasUsed
+    task.worker = event.params.workerAddress.toHexString()
+
     task.modifiedAt = event.block.timestamp
     task.modifiedAtBlock = event.block.number
     task.modifiedAtTransaction = event.transaction.hash
@@ -55,13 +115,36 @@ export function handleReceiptFailed(event: ReceiptFailed): void {
     state.failedTaskCount = state.failedTaskCount.plus(BIGINT_ONE)
     state.save()
 
+    let reward = task.gasPrice.times(BigDecimal.fromString(task.gasUsed.toString()))
+
+    let worker = Worker.load(event.params.workerAddress.toHexString())
+    worker.failedTaskCount = worker.failedTaskCount.plus(BIGINT_ONE)
+    worker.reward = worker.reward.plus(reward)
+    worker.save()
+
     let epoch = Epoch.load(task.epoch)
     epoch.failedTaskCount = epoch.failedTaskCount.plus(BIGINT_ONE)
-    // epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed) - FIXME: needs to add gasUsed to event params
-    // epoch.reward = epoch.reward.plus(reward) - FIXME: needs to add gasUsed to event params
+    epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed as BigInt)
+    epoch.reward = epoch.reward.plus(reward)
     epoch.save()
 
+    let secretContract = SecretContract.load(event.params.scAddr.toHexString())
+    if (secretContract != null) {
+      secretContract.taskCount = secretContract.taskCount.plus(BIGINT_ONE)
+      let users = secretContract.users || new Array<string>()
+
+      if (users.indexOf(task.sender.toHexString()) == -1) {
+        users.push(task.sender.toHexString())
+      }
+
+      secretContract.userCount = BigInt.fromI32(users.length)
+      secretContract.users = users
+      secretContract.save()
+    }
+
     task.save()
+
+    addStatisticsFailedTask(event.block.timestamp)
   } else {
     log.warning('Task #{} not found', [taskId])
   }
@@ -73,6 +156,10 @@ export function handleReceiptFailedETH(event: ReceiptFailedETH): void {
 
   if (task != null) {
     task.status = 'ReceiptFailedETH'
+    task.secretContract = event.params.scAddr.toHexString()
+    task.gasUsed = event.params.gasUsed
+    task.worker = event.params.workerAddress.toHexString()
+
     task.modifiedAt = event.block.timestamp
     task.modifiedAtBlock = event.block.number
     task.modifiedAtTransaction = event.transaction.hash
@@ -81,13 +168,36 @@ export function handleReceiptFailedETH(event: ReceiptFailedETH): void {
     state.failedTaskCount = state.failedTaskCount.plus(BIGINT_ONE)
     state.save()
 
+    let reward = task.gasPrice.times(BigDecimal.fromString(task.gasUsed.toString()))
+
+    let worker = Worker.load(event.params.workerAddress.toHexString())
+    worker.failedTaskCount = worker.failedTaskCount.plus(BIGINT_ONE)
+    worker.reward = worker.reward.plus(reward)
+    worker.save()
+
     let epoch = Epoch.load(task.epoch)
     epoch.failedTaskCount = epoch.failedTaskCount.plus(BIGINT_ONE)
-    // epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed) - FIXME: needs to add gasUsed to event params
-    // eepoch.reward = epoch.reward.plus(reward) - FIXME: needs to add gasUsed to event params
+    epoch.gasUsed = epoch.gasUsed.plus(task.gasUsed as BigInt)
+    epoch.reward = epoch.reward.plus(reward)
     epoch.save()
 
+    let secretContract = SecretContract.load(event.params.scAddr.toHexString())
+    if (secretContract != null) {
+      secretContract.taskCount = secretContract.taskCount.plus(BIGINT_ONE)
+      let users = secretContract.users || new Array<string>()
+
+      if (users.indexOf(task.sender.toHexString()) == -1) {
+        users.push(task.sender.toHexString())
+      }
+
+      secretContract.userCount = BigInt.fromI32(users.length)
+      secretContract.users = users
+      secretContract.save()
+    }
+
     task.save()
+
+    addStatisticsFailedTask(event.block.timestamp)
   } else {
     log.warning('Task #{} not found', [taskId])
   }
@@ -134,11 +244,24 @@ export function handleReceiptVerified(event: ReceiptVerified): void {
       users.push(task.sender.toHexString())
     }
 
+    if (!isZeroAddress(event.params.optionalEthereumContractAddress)) {
+      let ethContracts = secretContract.ethContracts || new Array<string>()
+
+      if (ethContracts.indexOf(event.params.optionalEthereumContractAddress.toHexString()) == -1) {
+        ethContracts.push(event.params.optionalEthereumContractAddress.toHexString())
+      }
+
+      secretContract.ethContracts = ethContracts
+      secretContract.ethContractCount = BigInt.fromI32(ethContracts.length)
+    }
+
     secretContract.userCount = BigInt.fromI32(users.length)
     secretContract.users = users
     secretContract.save()
 
     task.save()
+
+    addStatisticsCompletedTask(event.block.timestamp)
   } else {
     log.warning('Task #{} not found', [taskId])
   }
@@ -167,6 +290,14 @@ function createTask(
 
   let state = getCurrentState(event.address)
   state.taskCount = state.taskCount.plus(BIGINT_ONE)
+
+  let stateUsers = state.users || new Array<string>()
+  if (stateUsers.indexOf(sender.toHexString()) == -1) {
+    stateUsers.push(sender.toHexString())
+  }
+
+  state.userCount = BigInt.fromI32(stateUsers.length)
+  state.users = stateUsers
   state.save()
 
   task.epoch = state.latestEpoch
@@ -186,6 +317,9 @@ function createTask(
 
   task.order = state.taskCount
   task.save()
+
+  addStatisticsUsers(event.block.timestamp, sender.toHexString())
+  addStatisticsTask(event.block.timestamp)
 
   return task
 }
