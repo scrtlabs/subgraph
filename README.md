@@ -69,9 +69,27 @@ yarn deploy-local
 
 This is the last step, from now on you should see all the data being created.
 
-## To update subgraphs
-  - Do the proper changes to the code
-  - Remove the `./data` directory
-  - Re-generate the code `yarn codegen`
-  - Re-deploy `yarn deploy-local`
+## To run a clean subgraphs session
+  - Remove the `data/`, `build/` and `generated/` folders:
+    ```
+    sudo rm -rf data build generated
+    ````
+  - Re-generate the code, and restart:
+    ```
+    yarn codegen && yarn start-local
+    ```
+  - Wait for the previous command to finish starting up and re-deploy: 
+    ```
+    yarn create-local && deploy-local
+    ```
 
+## To update current subgraphs
+  - Do the proper changes to the code
+  - Re-generate the code, and restart:
+    ```
+    yarn codegen && yarn start-local
+    ```
+  - Wait for the previous command to finish starting up and re-deploy:
+    ```
+    yarn deploy-local
+    ```
