@@ -7,7 +7,7 @@ dataSources:
     network: mainnet
     source:
       abi: Enigma
-      address: '0x59d3631c86bbe35ef041872d502f218a39fba150'
+      address: '0x9b1f7F645351AF3631a656421eD2e40f2802E6c0'
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -28,13 +28,13 @@ dataSources:
           handler: handleWorkerDeposit
         - event: ReceiptFailed(bytes32,bytes32,uint256,address,bytes)
           handler: handleReceiptFailed
-        - event: ReceiptFailedETH(bytes32,bytes32,uint256,address,bytes)
+        - event: ReceiptFailedETH(bytes32,bytes32,uint256,uint256,address,bytes)
           handler: handleReceiptFailedETH
-        - event: ReceiptVerified(bytes32,bytes32,bytes32,bytes32,uint256,uint256,bytes,address,address,bytes)
+        - event: ReceiptVerified(uint64,address,bytes32[4],uint256,uint256,bytes,address,bytes)
           handler: handleReceiptVerified
         - event: Registered(address,address)
           handler: handleWorkerRegistration
-        - event: SecretContractDeployed(bytes32,bytes32,bytes32,uint256,bytes,address,address)
+        - event: SecretContractDeployed(uint64,address,bytes32[4],uint256,bytes,address)
           handler: handleSecretContractDeployment
         - event: TaskFeeReturned(bytes32)
           handler: handleTaskFeeReturned
