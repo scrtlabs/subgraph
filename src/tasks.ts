@@ -17,10 +17,16 @@ import { addStatisticsTask, addStatisticsFailedTask, addStatisticsCompletedTask,
 import { BIGINT_ONE, BIGINT_ZERO, isZeroAddress, BIGDECIMAL_ONE } from './helpers'
 
 export function handleSecretContractDeployment(event: SecretContractDeployed): void {
-  let secretContract = new SecretContract(event.params.scAddr.toHexString())
-  secretContract.address = event.params.scAddr
-  secretContract.codeHash = event.params.codeHash
-  secretContract.initStateDeltaHash = event.params.initStateDeltaHash
+  let bytes32s = event.params.bytes32s.map<Bytes>(param=> param)
+  let taskId = bytes32s[0]
+  let preCodeHash = bytes32s[1]
+  let codeHash = bytes32s[2]
+  let initStateDeltaHash = bytes32s[3]
+
+  let secretContract = new SecretContract(taskId.toHexString())
+  secretContract.address = taskId
+  secretContract.codeHash = codeHash
+  secretContract.initStateDeltaHash = initStateDeltaHash
 
   secretContract.createdAt = event.block.timestamp
   secretContract.createdAtBlock = event.block.number
@@ -42,17 +48,17 @@ export function handleSecretContractDeployment(event: SecretContractDeployed): v
   let state = getCurrentState(event.address)
   let currentEpoch = Epoch.load(state.latestEpoch)
   let deployedSecretContracts = currentEpoch.deployedSecretContracts || new Array<string>()
-  deployedSecretContracts.push(event.params.scAddr.toHexString())
+  deployedSecretContracts.push(taskId.toHexString())
   currentEpoch.deployedSecretContracts = deployedSecretContracts
   currentEpoch.save()
 
 
-  let taskId = event.params.scAddr.toHexString()
-  let task = Task.load(taskId)
+  // let taskId = event.params.bytes32s[0].toHexString()
+  let task = Task.load(taskId.toHexString())
 
   if (task != null) {
     task.status = 'ReceiptVerified'
-    task.secretContract = event.params.scAddr.toHexString()
+    task.secretContract = taskId.toHexString()
     task.gasUsed = event.params.gasUsed
     task.worker = event.params.workerAddress.toHexString()
     task.optionalEthereumContractAddress = event.params.optionalEthereumContractAddress
@@ -82,7 +88,7 @@ export function handleSecretContractDeployment(event: SecretContractDeployed): v
 
     addStatisticsCompletedTask(event.block.timestamp)
   } else {
-    log.warning('Task #{} not found', [taskId])
+    log.warning('Task #{} not found', [taskId.toHexString()])
   }
 }
 
@@ -204,12 +210,15 @@ export function handleReceiptFailedETH(event: ReceiptFailedETH): void {
 }
 
 export function handleReceiptVerified(event: ReceiptVerified): void {
-  let taskId = event.params.taskId.toHexString()
-  let task = Task.load(taskId)
+  let bytes32s = event.params.bytes32s.map<Bytes>(param=> param)
+  let scAddr = bytes32s[0]
+  let taskId = bytes32s[1]
+
+  let task = Task.load(taskId.toHexString())
 
   if (task != null) {
     task.status = 'ReceiptVerified'
-    task.secretContract = event.params.scAddr.toHexString()
+    task.secretContract = scAddr.toHexString()
     task.gasUsed = event.params.gasUsed
     task.worker = event.params.workerAddress.toHexString()
 
@@ -236,7 +245,7 @@ export function handleReceiptVerified(event: ReceiptVerified): void {
     epoch.reward = epoch.reward.plus(reward)
     epoch.save()
 
-    let secretContract = SecretContract.load(event.params.scAddr.toHexString())
+    let secretContract = SecretContract.load(scAddr.toHexString())
     secretContract.taskCount = secretContract.taskCount.plus(BIGINT_ONE)
     let users = secretContract.users || new Array<string>()
 
@@ -263,7 +272,7 @@ export function handleReceiptVerified(event: ReceiptVerified): void {
 
     addStatisticsCompletedTask(event.block.timestamp)
   } else {
-    log.warning('Task #{} not found', [taskId])
+    log.warning('Task #{} not found', [taskId.toHexString()])
   }
 }
 
