@@ -80,7 +80,7 @@ This is the last step, from now on you should see all the data being created.
     ```
   - Wait for the previous command to finish starting up and re-deploy: 
     ```
-    yarn create-local && deploy-local
+    yarn create-local && yarn deploy-local
     ```
 
 ## To update current subgraphs
