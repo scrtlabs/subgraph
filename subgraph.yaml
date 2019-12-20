@@ -4,10 +4,11 @@ schema:
 dataSources:
   - name: EnigmaSimulation
     kind: ethereum/contract
-    network: mainnet
+    network: kovan
     source:
       abi: Enigma
-      address: '0x9b1f7F645351AF3631a656421eD2e40f2802E6c0'
+      address: '0xEF6D304e9DAF5bc292AAAA6186749dd13ccbCac8'
+      startBlock: 15538103
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3

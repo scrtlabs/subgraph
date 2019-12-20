@@ -16,7 +16,7 @@ You can replace this with anything else in `docker-compose.yaml`.
 > ```
 > CONTAINER_ID=$(docker container ls | grep graph-node | cut -d' ' -f1)
 > docker exec $CONTAINER_ID /bin/bash -c 'ip route | awk "/^default via /{print $3}"'
-￼
+> ￼
 > ```
 >
 > This will print the host's IP address. Then, put it into `docker-compose.yml`:
@@ -26,17 +26,21 @@ You can replace this with anything else in `docker-compose.yaml`.
 > ```
 
 ### Steps to start the subgraph locally
+
 #### Install the dependencies
+
 ```
 yarn install
 ```
 
 #### Generate the code from the subgraph schema
+
 ```
 yarn codegen
 ```
 
 #### Start the subgraph locally
+
 ```
 yarn start-local
 ```
@@ -55,14 +59,16 @@ can access these via:
 - Postgres:
   - `postgresql://graph-node:let-me-in@localhost:5432/graph-node`
 
-
 #### Create the subgraph `enigmampc/enigma`
+
 Run this in a different terminal
+
 ```
 yarn create-local
 ```
 
 #### Deploy the subgraph
+
 ```
 yarn deploy-local
 ```
@@ -70,26 +76,48 @@ yarn deploy-local
 This is the last step, from now on you should see all the data being created.
 
 ## To run a clean subgraphs session
-  - Remove the `data/`, `build/` and `generated/` folders:
-    ```
-    sudo rm -rf data build generated
-    ````
-  - Re-generate the code, and restart:
-    ```
-    yarn codegen && yarn start-local
-    ```
-  - Wait for the previous command to finish starting up and re-deploy: 
-    ```
-    yarn create-local && yarn deploy-local
-    ```
+
+- Remove the `data/`, `build/` and `generated/` folders:
+  ```
+  sudo rm -rf data build generated
+  ```
+- Re-generate the code, and restart:
+  ```
+  yarn codegen && yarn start-local
+  ```
+- Wait for the previous command to finish starting up and re-deploy:
+  ```
+  yarn create-local && yarn deploy-local
+  ```
 
 ## To update current subgraphs
-  - Do the proper changes to the code
-  - Re-generate the code, and restart:
-    ```
-    yarn codegen && yarn start-local
-    ```
-  - Wait for the previous command to finish starting up and re-deploy:
-    ```
-    yarn deploy-local
-    ```
+
+- Do the proper changes to the code
+- Re-generate the code, and restart:
+  ```
+  yarn codegen && yarn start-local
+  ```
+- Wait for the previous command to finish starting up and re-deploy:
+  ```
+  yarn deploy-local
+  ```
+
+## Changing Network
+
+For changing the network where the contrac is deployed, you need to:
+
+- Update the following entries in the manifest (`subgraph.yaml`)
+
+  - dataSources.network: network to use, i.e. `kovan` or `mainnet`
+  - dataSources.source.address: Enigma smart contract address
+  - dataSources.source.startBlock: block number where Enigma contract was deployed
+
+- Update `services.graph-node.environment.ethereum` with `'<network>:<ethereum-rpc-url>'` i.e. `ethereum: 'kovan:https://kovan.infura.io/v3/PROJECT_ID'`
+
+then
+
+```bash
+$ rm -rf data build generated
+$ yarn codegen
+$ yarn deploy-local
+```
