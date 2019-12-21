@@ -7,8 +7,8 @@ dataSources:
     network: kovan
     source:
       abi: Enigma
-      address: '0xEF6D304e9DAF5bc292AAAA6186749dd13ccbCac8'
-      startBlock: 15538103
+      address: '0x758C82F0ecba028b9c7730F798F378EC121b5877'
+      startBlock: 15553965
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
