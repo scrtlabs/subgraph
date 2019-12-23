@@ -45,3 +45,7 @@ dataSources:
           handler: handleWorkerWithdraw
         - event: WorkersParameterized(uint256,uint256,uint256,address[],uint256[],uint256)
           handler: handleWorkersParameterized
+        - event: LoggedIn(address)
+          handler: handleWorkersLoggedIn
+        - event: LoggedOut(address)
+          handler: handleWorkersLoggedOut
