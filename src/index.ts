@@ -12,4 +12,6 @@ export {
   handleWorkerDeposit,
   handleWorkerWithdraw,
   handleWorkersParameterized,
+  handleWorkersLoggedIn,
+  handleWorkersLoggedOut,
 } from './workers'

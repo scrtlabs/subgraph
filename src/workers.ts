@@ -6,7 +6,11 @@ import {
   // ValidatedSig,
   WithdrawSuccessful,
   WorkersParameterized,
+  LoggedIn,
+  LoggedOut,
 } from '../generated/EnigmaSimulation/Enigma'
+
+import { Enigma } from '../generated/EnigmaSimulation/Enigma'
 
 import { Epoch, Worker, WorkerSigner } from '../generated/schema'
 
@@ -43,7 +47,10 @@ export function handleWorkerRegistration(event: Registered): void {
 }
 
 export function handleWorkerDeposit(event: DepositSuccessful): void {
-  let workerId = event.params.from.toHexString()
+  let enigma = Enigma.bind(event.address)
+  let operatingAddress = enigma.getOperatingAddressFromStakingAddress(event.params.from)
+
+  let workerId = operatingAddress.toHexString()
   let worker = Worker.load(workerId)
 
   if (worker != null) {
@@ -55,12 +62,15 @@ export function handleWorkerDeposit(event: DepositSuccessful): void {
     state.staked = state.staked.plus(value)
     state.save()
   } else {
-    log.warning('Worker #{} not found', [workerId])
+    log.warning('handleWorkerDeposit: Worker #{} not found', [workerId])
   }
 }
 
 export function handleWorkerWithdraw(event: WithdrawSuccessful): void {
-  let workerId = event.params.to.toHexString()
+  let enigma = Enigma.bind(event.address)
+  let operatingAddress = enigma.getOperatingAddressFromStakingAddress(event.params.to)
+
+  let workerId = operatingAddress.toHexString()
   let worker = Worker.load(workerId)
 
   if (worker != null) {
@@ -72,7 +82,35 @@ export function handleWorkerWithdraw(event: WithdrawSuccessful): void {
     state.staked = state.staked.minus(value)
     state.save()
   } else {
-    log.warning('Worker #{} not found', [workerId])
+    log.warning('handleWorkerWithdraw: Worker #{} not found', [workerId])
+  }
+}
+
+export function handleWorkersLoggedIn(event: LoggedIn): void {
+  let workerId = event.params.workerAddress.toHexString()
+  let worker = Worker.load(workerId)
+
+  log.warning('handleWorkersLoggedIn: Worker #{}', [workerId])
+
+  if (worker != null) {
+    worker.status = 'LoggedIn'
+    worker.save()
+  } else {
+    log.warning('handleWorkersLoggedIn: Worker #{} not found', [workerId])
+  }
+}
+
+export function handleWorkersLoggedOut(event: LoggedOut): void {
+  let workerId = event.params.workerAddress.toHexString()
+  let worker = Worker.load(workerId)
+
+  log.warning('handleWorkersLoggedOut: Worker #{}', [workerId])
+
+  if (worker != null) {
+    worker.status = 'LoggedOut'
+    worker.save()
+  } else {
+    log.warning('handleWorkersLoggedOut: Worker #{} not found', [workerId])
   }
 }
 
@@ -123,16 +161,18 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
         let workerStake = (event.params.stakes as BigInt[])[w]
         epoch.stakes = epoch.stakes.concat([toDecimal(workerStake)])
       } else {
-        log.warning('Worker #{} not found', [workerId])
+        log.warning('handleWorkersParameterized: Worker #{} not found', [workerId])
       }
     } else {
-      log.warning('Worker with signer #{} not found', [workerSignerId])
+      log.warning('handleWorkersParameterized: Worker with signer #{} not found', [
+        workerSignerId,
+      ])
     }
   }
 
   if (event.params.nonce.notEqual(BIGINT_ZERO)) {
     let prevEpoch = Epoch.load(state.latestEpoch)
-    prevEpoch.endBlockNumber =  event.params.firstBlockNumber.minus(BIGINT_ONE)
+    prevEpoch.endBlockNumber = event.params.firstBlockNumber.minus(BIGINT_ONE)
     prevEpoch.save()
 
     epoch.deployedSecretContracts = prevEpoch.deployedSecretContracts
@@ -142,7 +182,7 @@ export function handleWorkersParameterized(event: WorkersParameterized): void {
 
   if (event.params.nonce.notEqual(BIGINT_ZERO)) {
     let prevEpoch = Epoch.load(state.latestEpoch)
-    prevEpoch.endBlockNumber =  event.params.firstBlockNumber.minus(BIGINT_ONE)
+    prevEpoch.endBlockNumber = event.params.firstBlockNumber.minus(BIGINT_ONE)
     prevEpoch.save()
   }
 
