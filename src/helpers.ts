@@ -1,6 +1,6 @@
 import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts'
 
-import { ZERO_ADDRESS, KEY_MANAGEMENT__ADDRESS } from './constants'
+import { ZERO_ADDRESS, KEY_MANAGEMENT_ADDRESSES } from './constants'
 
 export let BIGINT_ONE = BigInt.fromI32(1)
 export let BIGINT_ZERO = BigInt.fromI32(0)
@@ -12,5 +12,5 @@ export function isZeroAddress(value: Address): boolean {
 }
 
 export function isKeyManagementAddress(value: Address): boolean {
-  return value.toHex() == KEY_MANAGEMENT__ADDRESS
+  return KEY_MANAGEMENT_ADDRESSES.indexOf(value.toHex()) >= 0
 }
