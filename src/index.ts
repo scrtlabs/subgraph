@@ -4,7 +4,6 @@ export {
   handleReceiptFailed,
   handleReceiptFailedETH,
   handleReceiptVerified,
-  handleTaskFeeReturned,
 } from './tasks'
 
 export {

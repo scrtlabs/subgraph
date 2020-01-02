@@ -1,4 +1,11 @@
-import { Address, BigInt, Bytes, EthereumEvent, log, BigDecimal } from '@graphprotocol/graph-ts'
+import {
+  Address,
+  BigInt,
+  Bytes,
+  EthereumEvent,
+  log,
+  BigDecimal,
+} from '@graphprotocol/graph-ts'
 
 import {
   ReceiptFailed,
@@ -13,13 +20,17 @@ import { SecretContract, Task, Worker, Epoch } from '../generated/schema'
 
 import { toDecimal } from './token'
 import { getCurrentState } from './state'
-import { addStatisticsTask, addStatisticsFailedTask, addStatisticsCompletedTask, addStatisticsUsers } from './statiscits'
+import {
+  addStatisticsTask,
+  addStatisticsFailedTask,
+  addStatisticsCompletedTask,
+  addStatisticsUsers,
+} from './statiscits'
 import { BIGINT_ONE, BIGINT_ZERO, isZeroAddress, BIGDECIMAL_ONE } from './helpers'
 
 export function handleSecretContractDeployment(event: SecretContractDeployed): void {
-  let bytes32s = event.params.bytes32s.map<Bytes>(param=> param)
+  let bytes32s = event.params.bytes32s.map<Bytes>(param => param)
   let taskId = bytes32s[0]
-  let preCodeHash = bytes32s[1]
   let codeHash = bytes32s[2]
   let initStateDeltaHash = bytes32s[3]
 
@@ -47,11 +58,11 @@ export function handleSecretContractDeployment(event: SecretContractDeployed): v
 
   let state = getCurrentState(event.address)
   let currentEpoch = Epoch.load(state.latestEpoch)
-  let deployedSecretContracts = currentEpoch.deployedSecretContracts || new Array<string>()
+  let deployedSecretContracts =
+    currentEpoch.deployedSecretContracts || new Array<string>()
   deployedSecretContracts.push(taskId.toHexString())
   currentEpoch.deployedSecretContracts = deployedSecretContracts
   currentEpoch.save()
-
 
   // let taskId = event.params.bytes32s[0].toHexString()
   let task = Task.load(taskId.toHexString())
@@ -210,7 +221,7 @@ export function handleReceiptFailedETH(event: ReceiptFailedETH): void {
 }
 
 export function handleReceiptVerified(event: ReceiptVerified): void {
-  let bytes32s = event.params.bytes32s.map<Bytes>(param=> param)
+  let bytes32s = event.params.bytes32s.map<Bytes>(param => param)
   let scAddr = bytes32s[0]
   let taskId = bytes32s[1]
 
@@ -256,7 +267,11 @@ export function handleReceiptVerified(event: ReceiptVerified): void {
     if (!isZeroAddress(event.params.optionalEthereumContractAddress)) {
       let ethContracts = secretContract.ethContracts || new Array<string>()
 
-      if (ethContracts.indexOf(event.params.optionalEthereumContractAddress.toHexString()) == -1) {
+      if (
+        ethContracts.indexOf(
+          event.params.optionalEthereumContractAddress.toHexString(),
+        ) == -1
+      ) {
         ethContracts.push(event.params.optionalEthereumContractAddress.toHexString())
       }
 
@@ -275,8 +290,6 @@ export function handleReceiptVerified(event: ReceiptVerified): void {
     log.warning('Task #{} not found', [taskId.toHexString()])
   }
 }
-
-export function handleTaskFeeReturned(event: TaskFeeReturned): void {}
 
 function createTask(
   taskId: Bytes,

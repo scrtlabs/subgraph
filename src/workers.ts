@@ -17,33 +17,40 @@ import { Epoch, Worker, WorkerSigner } from '../generated/schema'
 import { getCurrentState } from './state'
 import { toDecimal } from './token'
 import { addStatisticsEpoch, addStatisticsWorkers } from './statiscits'
-import { BIGINT_ZERO, BIGINT_ONE, BIGDECIMAL_ZERO, BIGDECIMAL_ONE } from './helpers'
+import {
+  BIGINT_ZERO,
+  BIGINT_ONE,
+  BIGDECIMAL_ZERO,
+  isKeyManagementAddress,
+} from './helpers'
 
 export function handleWorkerRegistration(event: Registered): void {
-  let worker = new Worker(event.params.custodian.toHexString())
-  worker.custodianAddress = event.params.custodian
-  worker.signerAddress = event.params.signer
-  worker.status = 'LoggedOut'
-  worker.balance = BigDecimal.fromString('0')
-  worker.epochs = []
+  if (!isKeyManagementAddress(event.params.custodian)) {
+    let worker = new Worker(event.params.custodian.toHexString())
+    worker.custodianAddress = event.params.custodian
+    worker.signerAddress = event.params.signer
+    worker.status = 'LoggedOut'
+    worker.balance = BigDecimal.fromString('0')
+    worker.epochs = []
 
-  worker.completedTaskCount = BIGINT_ZERO
-  worker.failedTaskCount = BIGINT_ZERO
-  worker.epochCount = BIGINT_ZERO
+    worker.completedTaskCount = BIGINT_ZERO
+    worker.failedTaskCount = BIGINT_ZERO
+    worker.epochCount = BIGINT_ZERO
 
-  worker.createdAt = event.block.timestamp
-  worker.createdAtBlock = event.block.number
-  worker.createdAtTransaction = event.transaction.hash
+    worker.createdAt = event.block.timestamp
+    worker.createdAtBlock = event.block.number
+    worker.createdAtTransaction = event.transaction.hash
 
-  worker.save()
+    worker.save()
 
-  let workerSigner = new WorkerSigner(event.params.signer.toHexString())
-  workerSigner.custodianAddress = event.params.custodian
-  workerSigner.save()
+    let workerSigner = new WorkerSigner(event.params.signer.toHexString())
+    workerSigner.custodianAddress = event.params.custodian
+    workerSigner.save()
 
-  let state = getCurrentState(event.address)
-  state.workerCount = state.workerCount.plus(BIGINT_ONE)
-  state.save()
+    let state = getCurrentState(event.address)
+    state.workerCount = state.workerCount.plus(BIGINT_ONE)
+    state.save()
+  }
 }
 
 export function handleWorkerDeposit(event: DepositSuccessful): void {
@@ -89,8 +96,6 @@ export function handleWorkerWithdraw(event: WithdrawSuccessful): void {
 export function handleWorkersLoggedIn(event: LoggedIn): void {
   let workerId = event.params.workerAddress.toHexString()
   let worker = Worker.load(workerId)
-
-  log.warning('handleWorkersLoggedIn: Worker #{}', [workerId])
 
   if (worker != null) {
     worker.status = 'LoggedIn'
