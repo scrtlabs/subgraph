@@ -126,7 +126,7 @@ $ yarn deploy-local
 
 #### Create a Graph Explorer account
 
-Before using the hosted service, create an account in The Graph Explorer. You will need a Github account for that; if you don't have one, you need to create that first. Then, navigate to the [Graph Explorer](https://thegraph.com/explorer/), click on the 'Sign up with Github' button and complete Github's authorization flow.
+Before using the hosted service, create an account in The Graph Explorer. You will need a Github account for that; if you don't have one, you need to create that first. Then, navigate to the [Graph Explorer](https://thegraph.com/explorer/), click on the `Sign up with Github` button and complete Github's authorization flow.
 
 ### Store the access token
 
@@ -138,19 +138,30 @@ $ yarn auth
 
 You only need to do this once, or if you ever regenerate the access token.
 
+*NOTE: In some systems this command will not work, skip to the next section and be sure to add `--access-token <ACCESS_TOKEN>` to the deploy script.*
+
 ### Create the subgraph
 
-Before deploying the subgraph, create it in the Graph Explorer. Go to the [dashboard](https://thegraph.com/explorer/dashboard) and click on the 'Add Subgraph' button. On the next screen, specify a name for the subgraph, and can also upload a custom image that will be displayed for your subgraph in the public Graph Explorer overview.
+Before deploying the subgraph, create it in the Graph Explorer. Go to the [dashboard](https://thegraph.com/explorer/dashboard) and click on the `Add Subgraph` button. On the next screen, specify a name for the subgraph, and can also upload a custom image that will be displayed for your subgraph in the public Graph Explorer overview.
 
 Note that it is currently not possible to change the subgraph name or image once it is created.
 
 Update package.json `deploy` script to:
-`"deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ GITHUB_USERNAME/SUBGRAPH_NAME",`
+```
+"deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ GITHUB_USERNAME/SUBGRAPH_NAME --access-token <ACCESS_TOKEN>",
+```
+
+### Update the Key Management address
+
+The subgraph will not include the Key Management node in the list of workers, if configured to do so. Edit `src/constants.ts` and add the *operating address* to the *keyManagementAddresses* array.
 
 ### Deploy the subgraph
 
-Deploying your subgraph will upload the subgraph files that you've built with yarn build to IPFS and tell the Graph Explorer to start indexing your subgraph using these files.
+Deploying your subgraph will upload the subgraph files that you've built with yarn build to IPFS and tell the Graph Explorer to start indexing your subgraph using these files:
 
-You deploy the subgraph by running `yarn deploy`
+```bash
+yarn codegen
+yarn deploy
+```
 
 After deploying the subgraph, the Graph Explorer will switch to showing the synchronization status of your subgraph. Depending on the amount of data and the number of events that need to be extracted from historical Ethereum blocks, starting with the genesis block, syncing can take from a few minutes to several hours. The subgraph status switches to Synced once the Graph Node has extracted all data from historical blocks. The Graph Node will continue inspecting Ethereum blocks for your subgraph as these blocks are mined.
