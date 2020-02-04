@@ -138,7 +138,7 @@ $ yarn auth
 
 You only need to do this once, or if you ever regenerate the access token.
 
-*NOTE: In some systems this command will not work, skip to the next section and be sure to add `--access-token <ACCESS_TOKEN>` to the deploy script.*
+_NOTE: In some systems this command will not work, skip to the next section and be sure to add `--access-token <ACCESS_TOKEN>` to the deploy script._
 
 ### Create the subgraph
 
@@ -147,13 +147,16 @@ Before deploying the subgraph, create it in the Graph Explorer. Go to the [dashb
 Note that it is currently not possible to change the subgraph name or image once it is created.
 
 Update package.json `deploy` script to:
+
 ```
 "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ GITHUB_USERNAME/SUBGRAPH_NAME --access-token <ACCESS_TOKEN>",
 ```
 
 ### Update the Key Management address
 
-The subgraph will not include the Key Management node in the list of workers, if configured to do so. Edit `src/constants.ts` and add the *operating address* to the *keyManagementAddresses* array.
+The subgraph will not include the Key Management node in the list of workers, if configured to do so. Edit `src/constants.ts` and add the _operating address_ to the _keyManagementAddresses_ array.
+
+_NOTE: the operating address MUST be entered all LOWERCASE, otherwise it will not be excluded._
 
 ### Deploy the subgraph
 
